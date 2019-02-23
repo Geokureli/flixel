@@ -5,6 +5,7 @@ import flash.events.TouchEvent;
 import flash.Lib;
 import flash.ui.Multitouch;
 import flash.ui.MultitouchInputMode;
+import flixel.system.replay.TouchRecord;
 
 /**
  * ...
@@ -280,6 +281,51 @@ class FlxTouchManager implements IFlxInputManager
 	function onFocusLost():Void
 	{
 		reset();
+	}
+	
+	@:allow(flixel.system.replay.FlxReplay)
+	function record():Null<Array<TouchRecord>>
+	{
+		var records:Null<Array<TouchRecord>> = null;
+		
+		var i:Int = list.length - 1;
+		
+		while (i >= 0)
+		{
+			var record = list[i].record();
+			if (record != null)
+			{
+				if (records == null)
+				{
+					records = [];
+				}
+				
+				records.push(record);
+			}
+			
+			i--;
+		}
+		
+		return records;
+	}
+	
+	@:allow(flixel.system.replay.FlxReplay)
+	function playback(records:Array<TouchRecord>):Void
+	{
+		var i:Int = records.length - 1;
+		
+		while (i >= 0)
+		{
+			var record = records[i];
+			if (!_touchesCache.exists(record.id))
+			{
+				recycle(0, 0, record.id);
+			}
+			
+			getByID(record.id).playback(record);
+			
+			i--;
+		}
 	}
 }
 #end
