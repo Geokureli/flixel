@@ -156,6 +156,11 @@ class FlxReplay
 		var mouseRecord:MouseRecord = FlxG.mouse.record();
 		if (mouseRecord != null) continueFrame = false;
 		#end
+		
+		#if FLX_TOUCH
+		var touchRecord:Array<TouchRecord> = FlxG.touches.record();
+		if (touchRecord != null) continueFrame = false;
+		#end
 
 		if (continueFrame)
 		{
@@ -169,6 +174,9 @@ class FlxReplay
 		#end
 		#if FLX_KEYBOARD
 		frameRecorded.keys = keysRecord;
+		#end
+		#if FLX_TOUCH
+		frameRecorded.touches = touchRecord;
 		#end
 		
 		_frames[frameCount++] = frameRecorded;
@@ -210,6 +218,13 @@ class FlxReplay
 		if (fr.mouse != null)
 		{
 			FlxG.mouse.playback(fr.mouse);
+		}
+		#end
+		
+		#if FLX_TOUCH
+		if (fr.touches != null)
+		{
+			FlxG.touches.playback(fr.touches);
 		}
 		#end
 	}

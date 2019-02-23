@@ -14,9 +14,13 @@ class FrameRecord
 	 */
 	public var keys:Array<CodeValuePair>;
 	/**
-	 * A container for the 4 mouse state integers.
+	 * A container for the mouse state values.
 	 */
 	public var mouse:MouseRecord;
+	/**
+	 * An array of touch states.
+	 */
+	public var touches:Array<TouchRecord>;
 	
 	/**
 	 * Instantiate array new frame record.
@@ -35,11 +39,12 @@ class FrameRecord
 	 * @param Mouse		Mouse data from the mouse manager.
 	 * @return A reference to this FrameRecord object.
 	 */
-	public function create(Frame:Float, ?Keys:Array<CodeValuePair>, ?Mouse:MouseRecord):FrameRecord
+	public function create(Frame:Float, ?Keys:Array<CodeValuePair>, ?Mouse:MouseRecord, ?Touches:Array<TouchRecord>):FrameRecord
 	{
 		frame = Math.floor(Frame);
 		keys = Keys;
 		mouse = Mouse;
+		touches = Touches;
 		
 		return this;
 	}
@@ -83,6 +88,24 @@ class FrameRecord
 			output += mouse.x + "," + mouse.y + "," + mouse.button + "," + mouse.wheel;
 		}
 		
+		
+		output += "t";
+		if (touches != null)
+		{
+			var touch:TouchRecord;
+			var i:Int = 0;
+			var l:Int = touches.length;
+			while (i < l)
+			{
+				if (i > 0)
+				{
+					output += ",";
+				}
+				touch = touches[i++];
+				output += touch.id + ";" + touch.x + ";" + touch.y + ";" + touch.state;
+			}
+		}
+		
 		return output;
 	}
 	
@@ -102,7 +125,9 @@ class FrameRecord
 		//split up keyboard and mouse data
 		array = array[1].split("m");
 		var keyData:String = array[0];
-		var mouseData:String = array[1];
+		array = array[1].split("t");
+		var mouseData:String = array[0];
+		var touchData:String = array[1];
 		
 		//parse keyboard data
 		if (keyData.length > 0)
@@ -138,6 +163,25 @@ class FrameRecord
 			}
 		}
 		
+		//mouse data is just 4 integers, easy peezy
+		if (touchData.length > 0)
+		{
+			array = touchData.split(",");
+			i = 0;
+			l = array.length;
+			while (i < l)
+			{
+				var touch = array[i++].split(";");
+				if (touch.length >= 4)
+				{
+					if (touches == null)
+					{
+						touches = new Array<TouchRecord>();
+					}
+					touches.push(new TouchRecord(Std.parseInt(touch[0]), Std.parseInt(touch[1]), Std.parseInt(touch[2]), Std.parseInt(touch[3])));
+				}
+			}
+		}
 		return this;
 	}
 }

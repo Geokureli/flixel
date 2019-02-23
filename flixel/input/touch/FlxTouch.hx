@@ -1,12 +1,14 @@
 package flixel.input.touch;
 
 #if FLX_TOUCH
+import flash.events.TouchEvent;
 import flash.geom.Point;
 import flixel.FlxG;
 import flixel.input.FlxInput;
 import flixel.input.FlxSwipe;
 import flixel.input.IFlxInput;
 import flixel.math.FlxPoint;
+import flixel.system.replay.TouchRecord;
 import flixel.util.FlxDestroyUtil;
 
 /**
@@ -34,6 +36,13 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 	public var justPressedPosition(default, null) = FlxPoint.get();
 	public var justPressedTimeInTicks(default, null):Int = -1;
 
+	/**
+	 * Helper variables for recording purposes.
+	 */
+	var _lastX:Int = 0;
+	var _lastY:Int = 0;
+	var _lastState:FlxInputState;
+	
 	public function destroy():Void
 	{
 		input = null;
@@ -121,6 +130,37 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 	inline function get_justPressed():Bool
 	{
 		return input.justPressed;
+	}
+	
+	function record():TouchRecord
+	{
+		if (_lastX == _globalScreenX && _lastY == _globalScreenY
+			&& (_lastState != RELEASED || _lastState != input.current))
+		{
+			return null;
+		}
+		
+		_lastX = _globalScreenX;
+		_lastY = _globalScreenY;
+		_lastState = input.current;
+		return new TouchRecord(touchPointID, _lastX, _lastY, input.current);
+	}
+	
+	function playback(record:TouchRecord):Void
+	{
+		
+		// Manually dispatch a touch event so that, e.g., FlxButtons click correctly on playback.
+		// Note: some clicks are fast enough to not pass through a frame where they are PRESSED
+		// and JUST_RELEASED is swallowed by FlxButton and others, but not third-party code
+		if ((_lastState == PRESSED || _lastState == JUST_PRESSED)
+			&& (record.state == RELEASED || record.state == JUST_RELEASED))
+		{
+			FlxG.stage.dispatchEvent(new TouchEvent(TouchEvent.TOUCH_END, true, false, record.id, false, record.x, record.y));
+		}
+		_lastState = input.current = record.state;
+		_globalScreenX = record.x;
+		_globalScreenY = record.y;
+		updatePositions();
 	}
 }
 #else
