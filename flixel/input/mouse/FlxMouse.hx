@@ -622,7 +622,8 @@ class FlxMouse extends FlxPointer implements IFlxInputManager
 	function record():MouseRecord
 	{
 		if ((_lastX == _globalScreenX) && (_lastY == _globalScreenY) 
-			&& (_lastLeftButtonState == _leftButton.current) && (_lastWheel == wheel))
+			&& (_lastLeftButtonState != RELEASED || _lastLeftButtonState != input.current)
+			&& (_lastWheel == wheel))
 		{
 			return null;
 		}
