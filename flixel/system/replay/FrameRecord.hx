@@ -1,5 +1,6 @@
 package flixel.system.replay;
 
+import flixel.input.FlxInput.FlxInputState;
 /**
  * Helper class for the new replay system.  Represents all the game inputs for one "frame" or "step" of the game loop.
  */
@@ -113,7 +114,7 @@ class FrameRecord
 	 * Load the frame record data from array simple ASCII string.
 	 * @param	Data	A String object containing the relevant frame record data.
 	 */
-	public function load(Data:String):FrameRecord
+	public function load(Data:String, PrevFrame:FrameRecord):FrameRecord
 	{
 		var i:Int;
 		var l:Int;
@@ -137,6 +138,7 @@ class FrameRecord
 			
 			//go through each data pair and enter it into this frame's key state
 			var keyPair:Array<String>;
+			var keysChanged:Array<Int> = [];
 			i = 0;
 			l = array.length;
 			while (i < l)
@@ -148,7 +150,26 @@ class FrameRecord
 					{
 						keys = new Array<CodeValuePair>();
 					}
-					keys.push(new CodeValuePair(Std.parseInt(keyPair[0]), Std.parseInt(keyPair[1])));
+					var key = new CodeValuePair(Std.parseInt(keyPair[0]), Std.parseInt(keyPair[1]));
+					keys.push(key);
+					keysChanged.push(key.code);
+				}
+			}
+			
+			i = 0;
+			l = PrevFrame != null && PrevFrame.keys != null ? PrevFrame.keys.length : 0;
+			
+			//use the previous frame's key state if there is no change
+			while (i < l)
+			{
+				var keyPair = PrevFrame.keys[i++];
+				if (keyPair.value != RELEASED && keysChanged.indexOf(keyPair.code) == -1)
+				{
+					if (keys == null)
+					{
+						keys = new Array<CodeValuePair>();
+					}
+					keys.push(keyPair);
 				}
 			}
 		}
@@ -161,6 +182,10 @@ class FrameRecord
 			{
 				mouse = new MouseRecord(Std.parseInt(array[0]), Std.parseInt(array[1]), Std.parseInt(array[2]), Std.parseInt(array[3]));
 			}
+		}
+		else if(PrevFrame != null)
+		{
+			mouse = PrevFrame.mouse;
 		}
 		
 		if (touchData != null && touchData.length > 0)
@@ -181,6 +206,11 @@ class FrameRecord
 				}
 			}
 		}
+		else if(PrevFrame != null)
+		{
+			touches = PrevFrame.touches;
+		}
+		
 		return this;
 	}
 }

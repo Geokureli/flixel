@@ -134,8 +134,7 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 	
 	function record():TouchRecord
 	{
-		if (_lastX == _globalScreenX && _lastY == _globalScreenY
-			&& (_lastState != RELEASED || _lastState != input.current))
+		if (_lastX == _globalScreenX && _lastY == _globalScreenY && _lastState == input.current)
 		{
 			return null;
 		}

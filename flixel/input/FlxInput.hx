@@ -11,6 +11,10 @@ class FlxInput<T> implements IFlxInput
 	
 	public var current:FlxInputState = RELEASED;
 	public var last:FlxInputState = RELEASED;
+	/**
+	 * Helper variables for recording purposes.
+	 */
+	var lastRecorded:FlxInputState = RELEASED;
 	
 	public function new(ID:T) 
 	{
@@ -47,6 +51,7 @@ class FlxInput<T> implements IFlxInput
 	{
 		current = RELEASED;
 		last = RELEASED;
+		lastRecorded = RELEASED;
 	}
 	
 	public function hasState(state:FlxInputState):Bool

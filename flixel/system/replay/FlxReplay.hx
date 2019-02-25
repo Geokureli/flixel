@@ -103,12 +103,15 @@ class FlxReplay
 		var line:String;
 		var i:Int = 1;
 		var l:Int = lines.length;
+		var prevFrame:Null<FrameRecord> = null;
 		while (i < l)
 		{
 			line = lines[i++];
 			if (line.length > 3)
 			{
-				_frames[frameCount++] = new FrameRecord().load(line);
+				_frames[frameCount] = new FrameRecord().load(line, prevFrame);
+				prevFrame = _frames[frameCount];
+				frameCount++;
 				if (frameCount >= _capacity)
 				{
 					_capacity *= 2;
@@ -200,12 +203,12 @@ class FlxReplay
 			finished = true;
 			return;
 		}
-		if (_frames[_marker].frame != frame++)
-		{
-			return;
-		}
 		
-		var fr:FrameRecord = _frames[_marker++];
+		var fr:FrameRecord = _frames[_marker];
+		if (_marker + 1 >= frameCount || _frames[_marker + 1].frame == ++frame)
+		{
+			_marker++;
+		}
 		
 		#if FLX_KEYBOARD
 		if (fr.keys != null)
