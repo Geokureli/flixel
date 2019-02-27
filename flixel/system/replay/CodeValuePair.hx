@@ -66,34 +66,4 @@ class CodeValuePair
 		
 		return output;
 	}
-	
-	/**
-	 * Copies all active key data from the previous frame unless the current key data overrides it
-	 * @param newKeys List of all unique key changes from the current frame
-	 * @param oldKeys List of all unique key changes from the previous frame
-	 */
-	public static function mergePreviousArray(newKeys:Array<CodeValuePair>, oldKeys:Array<CodeValuePair>):Void
-	{
-		// Create lookup
-		var usedKeys:Array<Int> = [];
-		
-		var i = 0;
-		var l = newKeys.length;
-		while (i < l)
-		{
-			usedKeys.push(newKeys[i++].code);
-		}
-		
-		i = 0;
-		l = oldKeys.length;
-		//use the previous frame's key state if there is no change
-		while (i < l)
-		{
-			var key = oldKeys[i++];
-			if (key.value != RELEASED && usedKeys.indexOf(key.code) == -1)
-			{
-				newKeys.push(key);
-			}
-		}
-	}
 }

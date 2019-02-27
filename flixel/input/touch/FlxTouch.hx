@@ -139,17 +139,27 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 			return null;
 		}
 		
-		inline function getChange<T>(value:T, lastValue:T):Null<T>
+		var record:TouchRecord;
+		if (input.current != input.last && input.current == JUST_PRESSED)
 		{
-			return value == lastValue ? null : value;
+			// Always record x and y when starting a new touch
+			record = new TouchRecord(touchPointID, _globalScreenX, _globalScreenY, input.current);
 		}
-		var record:TouchRecord = new TouchRecord
-		(
-			touchPointID,
-			getChange(_globalScreenX, _lastX),
-			getChange(_globalScreenY, _lastY),
-			getChange(input.current, input.last)
-		);
+		else 
+		{
+			// Only records changed properties
+			inline function getChange<T>(value:T, lastValue:T):Null<T>
+			{
+				return value == lastValue ? null : value;
+			}
+			record = new TouchRecord
+			(
+				touchPointID,
+				getChange(_globalScreenX, _lastX),
+				getChange(_globalScreenY, _lastY),
+				getChange(input.current, input.last)
+			);
+		}
 		
 		_lastX = _globalScreenX;
 		_lastY = _globalScreenY;

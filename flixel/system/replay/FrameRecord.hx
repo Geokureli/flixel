@@ -112,33 +112,18 @@ class FrameRecord
 		{
 			//get keystroke data pairs
 			keys = CodeValuePair.arrayFromString(keyData);
-			// Merge previous frame's key data
-			if (keys != null && PrevFrame != null && PrevFrame.keys != null)
-			{
-				CodeValuePair.mergePreviousArray(keys, PrevFrame.keys);
-			}
 		}
 		
 		// Parse mouse data
 		if (mouseData.length > 0)
 		{
 			mouse = MouseRecord.fromString(mouseData);
-			// Use previous state's mouse data if there is no change
-			if(mouse != null && PrevFrame != null && PrevFrame.mouse != null && PrevFrame.mouse.hasPersistantChanges)
-			{
-				mouse.mergePreviousChanges(PrevFrame.mouse);
-			}
 		}
 		
 		// Parse touch data
-		if (touchData != null && touchData.length > 0)
+		if (touchData.length > 0)
 		{
 			touches = TouchRecord.arrayFromString(touchData);
-			// Merge previous frame's touch data
-			if(PrevFrame != null && PrevFrame.touches != null)
-			{
-				touches = TouchRecord.mergePreviousArray(touches, PrevFrame.touches);
-			}
 		}
 		
 		return this;

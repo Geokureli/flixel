@@ -299,12 +299,13 @@ class FlxTouchManager implements IFlxInputManager
 		{
 			if (getByID(_lastList[i]) == null)
 			{
-				_lastList.splice(i, 1);
-				// Record at least an empty frame to mark a touch being deactivated
 				if (records == null)
 				{
 					records = [];
 				}
+				// Record the removal from the list
+				records.push(new TouchRecord(_lastList[i], null, null, null, false));
+				_lastList.splice(i, 1);
 			}
 		}
 		
@@ -336,19 +337,33 @@ class FlxTouchManager implements IFlxInputManager
 	@:allow(flixel.system.replay.FlxReplay)
 	function playback(records:Array<TouchRecord>):Void
 	{
-		var i:Int = records.length - 1;
+		var i:Int = records.length;
 		
-		while (i >= 0)
+		while (--i >= 0)
 		{
 			var record = records[i];
-			if (!_touchesCache.exists(record.id))
+			if (!record.active)
 			{
-				recycle(0, 0, record.id);
+				// remove inactive touch
+				if (_touchesCache.exists(record.id))
+				{
+					var touch = getByID(record.id);
+					// Copied from update
+					touch.input.reset();
+					_touchesCache.remove(touch.touchPointID);
+					list.splice(i, 1);
+					_inactiveTouches.push(touch);
+				}
 			}
-			
-			getByID(record.id).playback(record);
-			
-			i--;
+			else
+			{
+				if (!_touchesCache.exists(record.id))
+				{
+					recycle(0, 0, record.id);
+				}
+				
+				getByID(record.id).playback(record);
+			}
 		}
 	}
 }

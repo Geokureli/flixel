@@ -25,10 +25,6 @@ class MouseRecord
 	 * The state of the mouse wheel.
 	 */
 	public var wheel(default, null):Null<Int>;
-	/**
-	 * Whether this record has unresolved changes that persist to the next frame
-	 */
-	public var hasPersistantChanges(get, never):Bool;
 	
 	/**
 	 * Instantiate a new mouse input record.
@@ -50,13 +46,6 @@ class MouseRecord
 		this.wheel = wheel;
 	}
 	
-	inline function get_hasPersistantChanges():Bool
-	{
-		return (leftButton != null && leftButton != RELEASED)
-			|| (middleButton != null && middleButton != RELEASED)
-			|| (rightButton != null && rightButton != RELEASED);
-	}
-	
 	public function toString():String
 	{
 		inline function intToString(value:Null<Int>):String
@@ -69,18 +58,6 @@ class MouseRecord
 			+ "," + intToString(cast middleButton)
 			+ "," + intToString(cast rightButton)
 			+ "," + intToString(wheel);
-	}
-	
-	public function mergePreviousChanges(record:MouseRecord):Void
-	{
-		if (leftButton == null && record.leftButton != RELEASED)
-			leftButton = record.leftButton;
-		
-		if (middleButton == null && record.middleButton != RELEASED)
-			middleButton = record.middleButton;
-		
-		if (rightButton == null && record.rightButton != RELEASED)
-			rightButton = record.rightButton;
 	}
 	
 	public static function fromString(data:String):Null<MouseRecord>

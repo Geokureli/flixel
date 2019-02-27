@@ -196,24 +196,17 @@ class FlxReplay
 	 */
 	public function playNextFrame():Void
 	{
-		FlxG.inputs.reset();
-		
 		if (_marker >= frameCount)
 		{
 			finished = true;
 			return;
 		}
-		
-		var fr:FrameRecord = _frames[_marker];
-		if (fr.frame > frame++)
+		if (_frames[_marker].frame != frame++)
 		{
 			return;
 		}
 		
-		if (_marker + 1 >= frameCount || _frames[_marker + 1].frame == frame)
-		{
-			_marker++;
-		}
+		var fr:FrameRecord = _frames[_marker++];
 		
 		#if FLX_KEYBOARD
 		if (fr.keys != null)
