@@ -152,7 +152,6 @@ class FlxMouse extends FlxPointer implements IFlxInputManager
 	var _lastX:Int = 0;
 	var _lastY:Int = 0;
 	var _lastWheel:Int = 0;
-	var _lastLeftButtonState:FlxInputState;
 	
 	/**
 	 * Helper variables to see if the mouse has moved since the last update.
@@ -619,36 +618,38 @@ class FlxMouse extends FlxPointer implements IFlxInputManager
 	}
 	
 	@:allow(flixel.system.replay.FlxReplay)
+	@:access(flixel.input.FlxInput.last)
 	function record():MouseRecord
 	{
 		if ((_lastX == _globalScreenX) && (_lastY == _globalScreenY) 
-			&& (_lastLeftButtonState == _leftButton.current) && (_lastWheel == wheel))
+			&& (_leftButton.last == _leftButton.current) && (_lastWheel == wheel))
 		{
 			return null;
 		}
 		
 		_lastX = _globalScreenX;
 		_lastY = _globalScreenY;
-		_lastLeftButtonState = _leftButton.current;
+		_leftButton.last = _leftButton.current;
 		_lastWheel = wheel;
 		return new MouseRecord(_lastX, _lastY, _leftButton.current, _lastWheel);
 	}
 	
 	@:allow(flixel.system.replay.FlxReplay)
-	function playback(Record:MouseRecord):Void
+	@:access(flixel.input.FlxInput.last)
+	function playback(record:MouseRecord):Void
 	{
 		// Manually dispatch a MOUSE_UP event so that, e.g., FlxButtons click correctly on playback.
 		// Note: some clicks are fast enough to not pass through a frame where they are PRESSED
 		// and JUST_RELEASED is swallowed by FlxButton and others, but not third-party code
-		if ((_lastLeftButtonState == PRESSED || _lastLeftButtonState == JUST_PRESSED)
-			&& (Record.button == RELEASED || Record.button == JUST_RELEASED))
+		if ((_leftButton.last == PRESSED || _leftButton.last == JUST_PRESSED)
+			&& (record.button == RELEASED || record.button == JUST_RELEASED))
 		{
-			_stage.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_UP, true, false, Record.x, Record.y));
+			_stage.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_UP, true, false, record.x, record.y));
 		}
-		_lastLeftButtonState = _leftButton.current = Record.button;
-		wheel = Record.wheel;
-		_globalScreenX = Record.x;
-		_globalScreenY = Record.y;
+		_leftButton.last = _leftButton.current = record.button;
+		wheel = record.wheel;
+		_globalScreenX = record.x;
+		_globalScreenY = record.y;
 		updatePositions();
 	}
 }

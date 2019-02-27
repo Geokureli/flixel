@@ -31,6 +31,10 @@ class FlxTouchManager implements IFlxInputManager
 	 * Helper storage for active touches (for faster access)
 	 */
 	var _touchesCache:Map<Int, FlxTouch>;
+	/**
+	 * Helper for recording, a list of ids the touches that were active in the previously recorded frame.
+	 */
+	var _lastList:Array<Int>;
 	
 	/**
 	 * WARNING: can be null if no active touch with the provided ID could be found
@@ -66,6 +70,7 @@ class FlxTouchManager implements IFlxInputManager
 			touch.destroy();
 		}
 		list = null;
+		_lastList = null;
 		
 		for (touch in _inactiveTouches)
 		{
@@ -160,6 +165,7 @@ class FlxTouchManager implements IFlxInputManager
 	function new() 
 	{
 		list = new Array<FlxTouch>();
+		_lastList = new Array<Int>();
 		_inactiveTouches = new Array<FlxTouch>();
 		_touchesCache = new Map<Int, FlxTouch>();
 		maxTouchPoints = Multitouch.maxTouchPoints;
@@ -288,11 +294,25 @@ class FlxTouchManager implements IFlxInputManager
 	{
 		var records:Null<Array<TouchRecord>> = null;
 		
-		var i:Int = list.length - 1;
-		
-		while (i >= 0)
+		var i:Int = _lastList.length;
+		while (--i >= 0)
 		{
-			var record = list[i].record();
+			if (getByID(_lastList[i]) == null)
+			{
+				_lastList.splice(i, 1);
+				// Record at least an empty frame to mark a touch being deactivated
+				if (records == null)
+				{
+					records = [];
+				}
+			}
+		}
+		
+		i = list.length;
+		while (--i >= 0)
+		{
+			var touch = list[i];
+			var record = touch.record();
 			if (record != null)
 			{
 				if (records == null)
@@ -303,7 +323,11 @@ class FlxTouchManager implements IFlxInputManager
 				records.push(record);
 			}
 			
-			i--;
+			// Save last recorded
+			if (_lastList.indexOf(touch.touchPointID) == -1)
+			{
+				_lastList.push(touch.touchPointID);
+			}
 		}
 		
 		return records;

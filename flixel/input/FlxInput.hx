@@ -10,11 +10,14 @@ class FlxInput<T> implements IFlxInput
 	public var justPressed(get, never):Bool;
 	
 	public var current:FlxInputState = RELEASED;
-	public var last:FlxInputState = RELEASED;
 	/**
-	 * Helper variables for recording purposes.
+	 * Whether the `JUST_PRESSED` or `JUST_RELEASED` was processed
 	 */
-	var lastRecorded:FlxInputState = RELEASED;
+	var waitedFrame:Bool = false;
+	/**
+	 * Helper variable for recording purposes.
+	 */
+	var last:FlxInputState = RELEASED;
 	
 	public function new(ID:T) 
 	{
@@ -23,35 +26,35 @@ class FlxInput<T> implements IFlxInput
 	
 	public function press():Void
 	{
-		last = current;
+		waitedFrame = false;
 		current = pressed ? PRESSED : JUST_PRESSED;
 	}
 	
 	public function release():Void
 	{
-		last = current;
+		waitedFrame = false;
 		current = pressed ? JUST_RELEASED: RELEASED;
 	}
 	
 	public function update():Void
 	{
-		if (last == JUST_RELEASED && current == JUST_RELEASED) 
+		if (current == JUST_RELEASED && waitedFrame) 
 		{
 			current = RELEASED;
 		}
-		else if (last == JUST_PRESSED && current == JUST_PRESSED) 
+		else if (current == JUST_PRESSED && waitedFrame)
 		{
 			current = PRESSED;
 		}
 		
-		last = current;
+		waitedFrame = true;
 	}
 	
 	public function reset():Void
 	{
 		current = RELEASED;
 		last = RELEASED;
-		lastRecorded = RELEASED;
+		waitedFrame = false;
 	}
 	
 	public function hasState(state:FlxInputState):Bool

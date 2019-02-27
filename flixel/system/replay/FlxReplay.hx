@@ -205,7 +205,12 @@ class FlxReplay
 		}
 		
 		var fr:FrameRecord = _frames[_marker];
-		if (_marker + 1 >= frameCount || _frames[_marker + 1].frame == ++frame)
+		if (fr.frame > frame++)
+		{
+			return;
+		}
+		
+		if (_marker + 1 >= frameCount || _frames[_marker + 1].frame == frame)
 		{
 			_marker++;
 		}

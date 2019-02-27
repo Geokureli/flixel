@@ -137,18 +137,18 @@ class FlxKeyboard extends FlxKeyManager<FlxKey, FlxKeyList>
 	 * @return	An array of key state data. Null if there is no data.
 	 */
 	@:allow(flixel.system.replay.FlxReplay)
-	@:access(flixel.input.FlxInput.lastRecorded)
+	@:access(flixel.input.FlxInput.last)
 	function record():Array<CodeValuePair>
 	{
 		var data:Array<CodeValuePair> = null;
 		
 		for (key in _keyListArray)
 		{
-			if (key == null || key.lastRecorded == key.current)
+			if (key == null || key.last == key.current)
 			{
 				continue;
 			}
-			key.lastRecorded = key.current;
+			key.last = key.current;
 			
 			if (data == null)
 			{
