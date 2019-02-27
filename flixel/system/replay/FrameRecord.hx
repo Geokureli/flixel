@@ -69,42 +69,19 @@ class FrameRecord
 		
 		if (keys != null)
 		{
-			var object:CodeValuePair;
-			var i:Int = 0;
-			var l:Int = keys.length;
-			while (i < l)
-			{
-				if (i > 0)
-				{
-					output += ",";
-				}
-				object = keys[i++];
-				output += object.code + ":" + object.value;
-			}
+			output += CodeValuePair.arrayToString(keys);
 		}
 		
 		output += "m";
 		if (mouse != null)
 		{
-			output += mouse.x + "," + mouse.y + "," + mouse.button + "," + mouse.wheel;
+			output += mouse.toString();
 		}
-		
 		
 		output += "t";
 		if (touches != null)
 		{
-			var touch:TouchRecord;
-			var i:Int = 0;
-			var l:Int = touches.length;
-			while (i < l)
-			{
-				if (i > 0)
-				{
-					output += ",";
-				}
-				touch = touches[i++];
-				output += touch.id + ";" + touch.x + ";" + touch.y + ";" + touch.state;
-			}
+			output += TouchRecord.arrayToString(touches);
 		}
 		
 		return output;
@@ -134,81 +111,34 @@ class FrameRecord
 		if (keyData.length > 0)
 		{
 			//get keystroke data pairs
-			array = keyData.split(",");
-			
-			//go through each data pair and enter it into this frame's key state
-			var keyPair:Array<String>;
-			var keysChanged:Array<Int> = [];
-			i = 0;
-			l = array.length;
-			while (i < l)
+			keys = CodeValuePair.arrayFromString(keyData);
+			// Merge previous frame's key data
+			if (keys != null && PrevFrame != null && PrevFrame.keys != null)
 			{
-				keyPair = array[i++].split(":");
-				if (keyPair.length == 2)
-				{
-					if (keys == null)
-					{
-						keys = new Array<CodeValuePair>();
-					}
-					var key = new CodeValuePair(Std.parseInt(keyPair[0]), Std.parseInt(keyPair[1]));
-					keys.push(key);
-					keysChanged.push(key.code);
-				}
-			}
-			
-			i = 0;
-			l = PrevFrame != null && PrevFrame.keys != null ? PrevFrame.keys.length : 0;
-			
-			//use the previous frame's key state if there is no change
-			while (i < l)
-			{
-				var keyPair = PrevFrame.keys[i++];
-				if (keyPair.value != RELEASED && keysChanged.indexOf(keyPair.code) == -1)
-				{
-					if (keys == null)
-					{
-						keys = new Array<CodeValuePair>();
-					}
-					keys.push(keyPair);
-				}
+				CodeValuePair.mergePreviousArray(keys, PrevFrame.keys);
 			}
 		}
 		
-		//mouse data is just 4 integers, easy peezy
+		// Parse mouse data
 		if (mouseData.length > 0)
 		{
-			array = mouseData.split(",");
-			if (array.length >= 4)
+			mouse = MouseRecord.fromString(mouseData);
+			// Use previous state's mouse data if there is no change
+			if(mouse != null && PrevFrame != null && PrevFrame.mouse != null && PrevFrame.mouse.hasPersistantChanges)
 			{
-				mouse = new MouseRecord(Std.parseInt(array[0]), Std.parseInt(array[1]), Std.parseInt(array[2]), Std.parseInt(array[3]));
+				mouse.mergePreviousChanges(PrevFrame.mouse);
 			}
-		}
-		else if(PrevFrame != null)
-		{
-			mouse = PrevFrame.mouse;
 		}
 		
+		// Parse touch data
 		if (touchData != null && touchData.length > 0)
 		{
-			array = touchData.split(",");
-			i = 0;
-			l = array.length;
-			while (i < l)
+			touches = TouchRecord.arrayFromString(touchData);
+			// Merge previous frame's touch data
+			if(PrevFrame != null && PrevFrame.touches != null)
 			{
-				var touch = array[i++].split(";");
-				if (touch.length >= 4)
-				{
-					if (touches == null)
-					{
-						touches = new Array<TouchRecord>();
-					}
-					touches.push(new TouchRecord(Std.parseInt(touch[0]), Std.parseInt(touch[1]), Std.parseInt(touch[2]), Std.parseInt(touch[3])));
-				}
+				touches = TouchRecord.mergePreviousArray(touches, PrevFrame.touches);
 			}
-		}
-		else if(PrevFrame != null)
-		{
-			touches = PrevFrame.touches;
 		}
 		
 		return this;

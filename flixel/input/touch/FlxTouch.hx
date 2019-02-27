@@ -132,35 +132,54 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 	}
 	
 	@:access(flixel.input.FlxInput.last)
-	function record():TouchRecord
+	function record():Null<TouchRecord>
 	{
 		if (_lastX == _globalScreenX && _lastY == _globalScreenY && input.last == input.current)
 		{
 			return null;
 		}
 		
+		inline function getChange<T>(value:T, lastValue:T):Null<T>
+		{
+			return value == lastValue ? null : value;
+		}
+		var record:TouchRecord = new TouchRecord
+		(
+			touchPointID,
+			getChange(_globalScreenX, _lastX),
+			getChange(_globalScreenY, _lastY),
+			getChange(input.current, input.last)
+		);
+		
 		_lastX = _globalScreenX;
 		_lastY = _globalScreenY;
 		input.last = input.current;
-		return new TouchRecord(touchPointID, _lastX, _lastY, input.current);
+		return record;
 	}
 	
 	@:access(flixel.input.FlxInput.last)
 	function playback(record:TouchRecord):Void
 	{
-		
-		// Manually dispatch a touch event so that, e.g., FlxButtons click correctly on playback.
-		// Note: some clicks are fast enough to not pass through a frame where they are PRESSED
-		// and JUST_RELEASED is swallowed by FlxButton and others, but not third-party code
-		if ((input.last == PRESSED || input.last == JUST_PRESSED)
-			&& (record.state == RELEASED || record.state == JUST_RELEASED))
+		if (record.x != null || record.y != null)
 		{
-			FlxG.stage.dispatchEvent(new TouchEvent(TouchEvent.TOUCH_END, true, false, record.id, false, record.x, record.y));
+			if (record.x != null) _globalScreenX = record.x;
+			if (record.y != null) _globalScreenY = record.y;
+			updatePositions();
 		}
-		input.last = input.current = record.state;
-		_globalScreenX = record.x;
-		_globalScreenY = record.y;
-		updatePositions();
+		
+		if (record.state != null)
+		{
+			// Manually dispatch a touch event so that, e.g., FlxButtons click correctly on playback.
+			// Note: some clicks are fast enough to not pass through a frame where they are PRESSED
+			// and JUST_RELEASED is swallowed by FlxButton and others, but not third-party code
+			if ((input.last == PRESSED || input.last == JUST_PRESSED)
+				&& (record.state == RELEASED || record.state == JUST_RELEASED))
+			{
+				FlxG.stage.dispatchEvent(new TouchEvent(TouchEvent.TOUCH_END, true, false, record.id, false, _globalScreenX, _globalScreenY));
+			}
+			
+			input.last = input.current = record.state;
+		}
 		
 		// Copied from update()
 		if (justPressed)

@@ -621,36 +621,69 @@ class FlxMouse extends FlxPointer implements IFlxInputManager
 	@:access(flixel.input.FlxInput.last)
 	function record():MouseRecord
 	{
-		if ((_lastX == _globalScreenX) && (_lastY == _globalScreenY) 
-			&& (_leftButton.last == _leftButton.current) && (_lastWheel == wheel))
+		if (_lastX == _globalScreenX
+			&& _lastY == _globalScreenY
+			&& _leftButton.last == _leftButton.current
+			&& _middleButton.last == _middleButton.current
+			&& _rightButton.last == _rightButton.current
+			&& _lastWheel == wheel)
 		{
 			return null;
 		}
 		
+		inline function getChange<T>(value:T, lastValue:T):Null<T>
+		{
+			return value == lastValue ? null : value;
+		}
+		var record = new MouseRecord
+		(
+			getChange(_globalScreenX, _lastX),
+			getChange(_globalScreenY, _lastY),
+			getChange(_leftButton.current, _leftButton.last),
+			getChange(_rightButton.current, _rightButton.last),
+			getChange(_middleButton.current, _middleButton.last),
+			getChange(wheel, _lastWheel)
+ 		);
+		
 		_lastX = _globalScreenX;
 		_lastY = _globalScreenY;
 		_leftButton.last = _leftButton.current;
+		_rightButton.last = _rightButton.current;
+		_middleButton.last = _middleButton.current;
 		_lastWheel = wheel;
-		return new MouseRecord(_lastX, _lastY, _leftButton.current, _lastWheel);
+		
+		return record;
 	}
 	
 	@:allow(flixel.system.replay.FlxReplay)
 	@:access(flixel.input.FlxInput.last)
 	function playback(record:MouseRecord):Void
 	{
-		// Manually dispatch a MOUSE_UP event so that, e.g., FlxButtons click correctly on playback.
-		// Note: some clicks are fast enough to not pass through a frame where they are PRESSED
-		// and JUST_RELEASED is swallowed by FlxButton and others, but not third-party code
-		if ((_leftButton.last == PRESSED || _leftButton.last == JUST_PRESSED)
-			&& (record.button == RELEASED || record.button == JUST_RELEASED))
+		if (record.x != null || record.y != null)
 		{
-			_stage.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_UP, true, false, record.x, record.y));
+			if (record.x != null) _globalScreenX = record.x;
+			if (record.y != null) _globalScreenY = record.y;
+			updatePositions();
 		}
-		_leftButton.last = _leftButton.current = record.button;
-		wheel = record.wheel;
-		_globalScreenX = record.x;
-		_globalScreenY = record.y;
-		updatePositions();
+		
+		if (record.leftButton != null)
+		{
+			// Manually dispatch a MOUSE_UP event so that, e.g., FlxButtons click correctly on playback.
+			// Note: some clicks are fast enough to not pass through a frame where they are PRESSED
+			// and JUST_RELEASED is swallowed by FlxButton and others, but not third-party code
+			if ((_leftButton.last == PRESSED || _leftButton.last == JUST_PRESSED)
+				&& (record.leftButton == RELEASED || record.leftButton == JUST_RELEASED))
+			{
+				_stage.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_UP, true, false, _globalScreenX, _globalScreenY));
+			}
+			_leftButton.last = _leftButton.current = record.leftButton;
+		}
+		if (record.rightButton != null)
+			_rightButton.last = _rightButton.current = record.rightButton;
+		if (record.middleButton != null)
+			_middleButton.last = _middleButton.current = record.middleButton;
+		if(record.wheel != null)
+			wheel = record.wheel;
 	}
 }
 #end
