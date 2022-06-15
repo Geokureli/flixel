@@ -208,15 +208,16 @@ class FlxAssetPaths
 	public static function getManifestFolder()
 	{
 		var exportPath = Path.directory(Compiler.getOutput());
+		#if windows
+		exportPath = Path.normalize('$exportPath/../bin');
+		#elseif mac
 		final target = Context.definedValue("target.name");
-		#if mac
 		if (target == "cpp" || target == "neko")
 		{
-			final projectPath = "Project.xml";
-			if (!FileSystem.exists(projectPath))
+			final project = FlxLimeMacroUtil.getProjectXml();
+			if (project == null)
 				Context.error("Could not find Project.xml in project root", Context.currentPos());
 			
-			final project = Xml.parse(File.getContent("Project.xml")).firstElement();
 			var fileName:String = null;
 			for (app in project.elementsNamed("app"))
 			{
