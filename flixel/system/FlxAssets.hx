@@ -1,5 +1,11 @@
 package flixel.system;
 
+import flixel.system.macros.FlxLimeMacroUtil;
+import haxe.io.Path;
+import haxe.macro.Expr;
+import haxe.macro.Compiler;
+import haxe.macro.Context;
+import haxe.macro.PositionTools;
 #if !macro
 import flash.display.BitmapData;
 import flash.display.Graphics;
@@ -52,7 +58,7 @@ class FlxAssets
 	 * Example usage:
 	 *
 	 * ```haxe
-	 * @:build(flixel.system.FlxAssets.buildFileReferences("assets/images"))
+	 * @:build(flixel.system.FlxAssets.buildFileReferences("assets/images/"))
 	 * class Images {}
 	 * ```
 	 *
@@ -60,15 +66,15 @@ class FlxAssets
 	 * @author Mark Knol
 	 * @see http://blog.stroep.nl/2014/01/haxe-macros/
 	 *
-	 * @param   directory          The directory to scan for files
-	 * @param   subDirectories     Whether to include subdirectories
-	 * @param   include            A string or `EReg` of files to include.
-	 *                             Example: `"*.jpg|*.png|*.gif"` will only add files with that extension
-	 * @param   exclude            A string or `EReg` of files to exclude.
-	 *                             Example: `"/exclude/*|*.ogg"` will exclude .ogg files and everything in the exclude folder
+	 * @param   directory       The directory to scan for files
+	 * @param   subDirectories  Whether to include subdirectories
+	 * @param   include         A string or `EReg` of files to include.
+	 *                          Example: `"*.jpg|*.png|*.gif"` will only add files with that extension
+	 * @param   exclude         A string or `EReg` of files to exclude.
+	 *                          Example: `"*exclude/*|*.ogg"` will exclude .ogg files and everything in the exclude folder
+	 * @param   rename          A function that takes the file path and returns a valid haxe field name.
 	 */
-	public static function buildFileReferences(directory = "assets/", subDirectories = false, ?include:haxe.macro.Expr, ?exclude:haxe.macro.Expr,
-			?rename:String->String):Array<haxe.macro.Expr.Field>
+	public static function buildFileReferences(directory = "assets/", subDirectories = false, ?include:Expr, ?exclude:Expr, ?rename:String->Null<String>):Array<Field>
 	{
 		#if doc_gen
 		return [];
@@ -77,8 +83,60 @@ class FlxAssets
 		#end
 	}
 
+	/**
+	 * Reads files from a directory relative to this project and generates `public static inline`
+	 * variables containing the string paths to the files in it.
+	 *
+	 * Example usage:
+	 *
+	 * ```haxe
+	 * @:build(flixel.system.FlxAssets.buildAllManifestReferences())
+	 * class AssetPaths {}
+	 * ```
+	 *
+	 * @param   include         A string or `EReg` of files to include.
+	 *                          Example: `"*.jpg|*.png|*.gif"` will only add files with that extension
+	 * @param   exclude         A string or `EReg` of files to exclude.
+	 *                          Example: `"*exclude/*|*.ogg"` will exclude .ogg files and everything in the exclude folder
+	 * @param   rename          A function that takes the file path and returns a valid haxe field name.
+	 */
+	public static function buildAllManifestReferences(?include:Expr, ?exclude:Expr, ?rename:String->Null<String>):Array<Field>
+	{
+		#if doc_gen
+		return [];
+		#else
+		if (isFlash())
+		{
+			Context.error("FlxAssets.buildAllManifestReferences is not available when targeting flash.", Context.currentPos());
+			return [];
+		}
+		
+		return flixel.system.macros.FlxAssetPaths.buildAllManifestReferences(exprToRegex(include), exprToRegex(exclude), rename);
+		#end
+	}
+	
+	public static function buildManifestReferences(manifest = "default", ?include:Expr, ?exclude:Expr, ?rename:String->Null<String>):Array<Field>
+	{
+		#if doc_gen
+		return [];
+		#else
+		if (isFlash())
+		{
+			Context.error("FlxAssets.buildManifestReferences is not available when targeting flash.", Context.currentPos());
+			return [];
+		}
+		
+		return flixel.system.macros.FlxAssetPaths.buildManifestReferences(manifest, exprToRegex(include), exprToRegex(exclude), rename);
+		#end
+	}
+	
+	static function isFlash()
+	{
+		return Context.definedValue("target.name") == "flash";
+	}
+	
 	#if !doc_gen
-	private static function exprToRegex(expr:haxe.macro.Expr):EReg
+	private static function exprToRegex(expr:Expr):EReg
 	{
 		switch(expr.expr)
 		{
