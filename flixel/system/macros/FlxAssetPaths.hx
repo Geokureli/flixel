@@ -66,7 +66,6 @@ class FlxAssetPaths
 
 		return fileReferences;
 	}
-	
 
 	public static function buildAllManifestReferences(?include:EReg, ?exclude:EReg, ?rename:String->Null<String>):Array<Field>
 	{
@@ -137,31 +136,6 @@ class FlxAssetPaths
 		return fileReferences;
 	}
 	
-	static function addIfUnique(fileReferences:Array<FileReference>, file:FileReference)
-	{
-		for (i in 0...fileReferences.length)
-		{
-			if (fileReferences[i].name == file.name)
-			{
-				var oldValue = fileReferences[i].value;
-				// if the old file is nested deeper in the folder structure
-				if (oldValue.split("/").length > file.value.split("/").length)
-				{
-					// replace it with the new one
-					fileReferences[i] = file;
-					Context.warning('Duplicate files named "${file.name}" ignoring $oldValue', Context.currentPos());
-				}
-				else
-				{
-					Context.warning('Duplicate files named "${file.name}" ignoring ${file.value}', Context.currentPos());
-				}
-				return;
-			}
-		}
-		
-		fileReferences.push(file);
-	}
-	
 	static function checkForManifestsFolder()
 	{
 		var folder = getManifestFolder();
@@ -218,6 +192,31 @@ class FlxAssetPaths
 		}
 		#end
 		return exportPath + "/manifest/";
+	}
+	
+	static function addIfUnique(fileReferences:Array<FileReference>, file:FileReference)
+	{
+		for (i in 0...fileReferences.length)
+		{
+			if (fileReferences[i].name == file.name)
+			{
+				var oldValue = fileReferences[i].value;
+				// if the old file is nested deeper in the folder structure
+				if (oldValue.split("/").length > file.value.split("/").length)
+				{
+					// replace it with the new one
+					fileReferences[i] = file;
+					Context.warning('Duplicate files named "${file.name}" ignoring $oldValue', Context.currentPos());
+				}
+				else
+				{
+					Context.warning('Duplicate files named "${file.name}" ignoring ${file.value}', Context.currentPos());
+				}
+				return;
+			}
+		}
+		
+		fileReferences.push(file);
 	}
 }
 
