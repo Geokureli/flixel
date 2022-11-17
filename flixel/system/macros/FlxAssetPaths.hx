@@ -25,17 +25,10 @@ class FlxAssetPaths
 		var fileReferences = getFileReferences(directory, subDirectories, include, exclude, rename);
 		var fields = Context.getBuildFields();
 
+		// create new fields based on file references!
 		for (fileRef in fileReferences)
-		{
-			// create new field based on file references!
-			fields.push({
-				name: fileRef.name,
-				doc: fileRef.documentation,
-				access: [Access.APublic, Access.AStatic, Access.AInline],
-				kind: FieldType.FVar(macro:String, macro $v{fileRef.value}),
-				pos: Context.currentPos()
-			});
-		}
+			fields.push(fileRef.createField());
+		
 		return fields;
 	}
 
@@ -80,17 +73,10 @@ class FlxAssetPaths
 		var fileReferences = getAllManifestReferences(include, exclude, rename);
 		var fields = Context.getBuildFields();
 
+		// create new fields based on file references!
 		for (fileRef in fileReferences)
-		{
-			// create new field based on file references!
-			fields.push({
-				name: fileRef.name,
-				doc: fileRef.documentation,
-				access: [Access.APublic, Access.AStatic, Access.AInline],
-				kind: FieldType.FVar(macro:String, macro $v{fileRef.value}),
-				pos: Context.currentPos()
-			});
-		}
+			fields.push(fileRef.createField());
+		
 		return fields;
 	}
 	
@@ -115,17 +101,10 @@ class FlxAssetPaths
 		var fileReferences = getManifestReferences(manifest, include, exclude, rename);
 		var fields = Context.getBuildFields();
 		
+		// create new fields based on file references!
 		for (fileRef in fileReferences)
-		{
-			// create new field based on file references!
-			fields.push({
-				name: fileRef.name,
-				doc: fileRef.documentation,
-				access: [Access.APublic, Access.AStatic, Access.AInline],
-				kind: FieldType.FVar(macro:String, macro $v{fileRef.value}),
-				pos: Context.currentPos()
-			});
-		}
+			fields.push(fileRef.createField());
+		
 		return fields;
 	}
 	
@@ -170,11 +149,11 @@ class FlxAssetPaths
 				{
 					// replace it with the new one
 					fileReferences[i] = file;
-					warn('Duplicate files named "${file.name}" ignoring $oldValue');
+					Context.warning('Duplicate files named "${file.name}" ignoring $oldValue', Context.currentPos());
 				}
 				else
 				{
-					warn('Duplicate files named "${file.name}" ignoring ${file.value}');
+					Context.warning('Duplicate files named "${file.name}" ignoring ${file.value}', Context.currentPos());
 				}
 				return;
 			}
@@ -185,24 +164,33 @@ class FlxAssetPaths
 	
 	static function checkForManifestsFolder()
 	{
-		var defines = "\n";
-		for (name=>value in Context.getDefines())
-			defines += '$name=>$value\n';
-		
-		// trace(defines);
-		
 		var folder = getManifestFolder();
+		Context.registerModuleDependency(Context.getLocalModule(), folder);
 		if (!FileSystem.exists(folder))
 		{
-			final target = FlxLimeMacroUtil.getTargetName();
-			
-			trace('Manifest missing, building assets target=$target folder=$folder');
-			// Sys.command("haxelib",  ["run", "lime", "update", target]);
+			Context.error(
+				'Manifest missing, try building to see manifest assets.\nManifest path:"$folder"',
+				Context.currentPos()
+			);
 		}
-		else
+	}
+	
+	/**
+	 * Runs lime update, with the same compiler flags passed into the lime display, to rebuild the
+	 * manifest. Currently never used.
+	 */
+	static function updateManifest()
+	{
+		final target = FlxLimeMacroUtil.getTargetName();
+		final defines = Context.getDefines();
+		var args = ["run", "lime", "update", target];
+		for (flag in defines.keys())
 		{
-			trace('Manifest found: $folder');
+			final value = defines[flag];
+			args.push('-D$flag=$value');
 		}
+		Context.info('Manifest missing, building assets', Context.currentPos());
+		Sys.command("haxelib", args);
 	}
 	
 	public static function getManifestFolder()
@@ -212,7 +200,7 @@ class FlxAssetPaths
 		exportPath = Path.normalize('$exportPath/../bin');
 		#elseif mac
 		final target = Context.definedValue("target.name");
-		if (target == "cpp" || target == "neko")
+		if (target == "cpp" || target == "neko" || target == "hl")
 		{
 			final project = FlxLimeMacroUtil.getProjectXml();
 			if (project == null)
@@ -230,11 +218,6 @@ class FlxAssetPaths
 		}
 		#end
 		return exportPath + "/manifest/";
-	}
-
-	static inline function warn(msg:String, ?info:PosInfos)
-	{
-		haxe.Log.trace("[Warning] " + msg, info);
 	}
 }
 
@@ -260,7 +243,7 @@ private class FileReference
 		name = name.split("-").join("_").split(".").join("__");
 		if (!valid.match(name)) // #1796
 		{
-			trace('[Warning] Invalid name: $name for file: $value');
+			Context.warning('Invalid name: $name for file: $value', Context.currentPos());
 			return null;
 		}
 		
@@ -279,6 +262,17 @@ private class FileReference
 		this.name = name;
 		this.value = value;
 		this.documentation = "`\"" + value + "\"` (auto generated).";
+	}
+	
+	public function createField():Field
+	{
+		return {
+			name: name,
+			doc: documentation,
+			access: [Access.APublic, Access.AStatic, Access.AInline],
+			kind: FieldType.FVar(macro:String, macro $v{value}),
+			pos: Context.currentPos()
+		};
 	}
 }
 

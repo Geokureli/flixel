@@ -1,6 +1,5 @@
 package flixel.system;
 
-import flixel.system.macros.FlxLimeMacroUtil;
 import haxe.io.Path;
 import haxe.macro.Expr;
 import haxe.macro.Compiler;
