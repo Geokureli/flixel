@@ -10,6 +10,7 @@ import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.graphics.frames.FlxFrame;
 import flixel.graphics.frames.FlxFramesCollection;
+import flixel.util.FlxColor;
 import flixel.util.typeLimit.OneOfFour;
 import flixel.util.typeLimit.OneOfThree;
 import flixel.util.typeLimit.OneOfTwo;
@@ -29,9 +30,44 @@ typedef FlxAngelCodeSource = OneOfTwo<Xml, String>;
 typedef FlxTexturePackerSource = OneOfTwo<String, TexturePackerObject>;
 typedef FlxSoundAsset = OneOfThree<String, Sound, Class<Sound>>;
 typedef FlxGraphicAsset = OneOfThree<FlxGraphic, BitmapData, String>;
+typedef FlxGraphicAssetDef = OneOfFour<FlxGraphicDef, FlxGraphic, BitmapData, String>;
 typedef FlxGraphicSource = OneOfThree<BitmapData, Class<Dynamic>, String>;
 typedef FlxTilemapGraphicAsset = OneOfFour<FlxFramesCollection, FlxGraphic, BitmapData, String>;
 typedef FlxBitmapFontGraphicAsset = OneOfFour<FlxFrame, FlxGraphic, BitmapData, String>;
+
+@:using(flixel.system.FlxAssets.FlxGraphicDefTools)
+enum FlxGraphicDef
+{
+	SHEET(asset:FlxGraphicAsset, ?width:Int, ?height:Int, ?unique:Bool, ?key:String);
+	SINGLE_FRAME(asset:FlxGraphicAsset, ?unique:Bool, ?key:String);
+	MAKE(width:Int, height:Int, ?color:FlxColor, ?unique:Bool, ?key:String);
+}
+
+class FlxGraphicDefTools
+{
+	public static function load(def:FlxGraphicDef, sprite:FlxSprite)
+	{
+		switch (def)
+		{
+			case SHEET(asset, width, height, unique, key):
+				sprite.loadGraphic(asset, true, get(width, 0), get(height, 0), bool(unique), key);
+			case SINGLE_FRAME(asset, unique, key):
+				sprite.loadGraphic(asset, false, 0, 0, bool(unique), key);
+			case MAKE(width, height, color, unique, key):
+				sprite.makeGraphic(width, height, get(color, FlxColor.WHITE), bool(unique), key);
+		}
+	}
+
+	static inline function get<T>(value:Null<T>, backup:T)
+	{
+		return value == null ? backup : value;
+	}
+
+	static inline function bool(value:Null<Bool>, backup = false)
+	{
+		return get(value, backup);
+	}
+}
 
 typedef FlxShader =
 	#if (openfl_legacy || nme)

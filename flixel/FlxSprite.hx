@@ -16,8 +16,7 @@ import flixel.math.FlxMath;
 import flixel.math.FlxMatrix;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
-import flixel.system.FlxAssets.FlxGraphicAsset;
-import flixel.system.FlxAssets.FlxShader;
+import flixel.system.FlxAssets;
 import flixel.util.FlxBitmapDataUtil;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
@@ -368,19 +367,32 @@ class FlxSprite extends FlxObject
 	 * Creates a `FlxSprite` at a specified position with a specified one-frame graphic.
 	 * If none is provided, a 16x16 image of the HaxeFlixel logo is used.
 	 *
-	 * @param   X               The initial X position of the sprite.
-	 * @param   Y               The initial Y position of the sprite.
-	 * @param   SimpleGraphic   The graphic you want to display
-	 *                          (OPTIONAL - for simple stuff only, do NOT use for animated images!).
+	 * @param   x         The initial X position of the sprite.
+	 * @param   y         The initial Y position of the sprite.
+	 * @param   graphic   The graphic you want to display
+	 *                    (OPTIONAL - for simple stuff only, do NOT use for animated images!).
 	 */
-	public function new(?X:Float = 0, ?Y:Float = 0, ?SimpleGraphic:FlxGraphicAsset)
+	public function new(?x:Float = 0, ?y:Float = 0, ?graphic:FlxGraphicAssetDef)
 	{
-		super(X, Y);
+		super(x, y);
 
 		useFramePixels = FlxG.renderBlit;
 		antialiasing = defaultAntialiasing;
-		if (SimpleGraphic != null)
-			loadGraphic(SimpleGraphic);
+		if (graphic != null)
+			createInitialGraphic(graphic);
+	}
+
+	inline function createInitialGraphic(graphic:FlxGraphicAssetDef)
+	{
+		if (graphic is FlxGraphicDef)
+		{
+			// FlxGraphicDefTools.load((cast graphic : FlxGraphicDef), this);
+			(cast graphic : FlxGraphicDef).load(this);
+		}
+		else
+		{
+			loadGraphic(cast graphic);
+		}
 	}
 
 	@:noCompletion
@@ -480,38 +492,38 @@ class FlxSprite extends FlxObject
 	 * HaxeFlixel copies the previous reference onto the `pixels` field instead
 	 * of creating another copy of the image data, to save memory.
 	 *
-	 * @param   Graphic    The image you want to use.
-	 * @param   Animated   Whether the `Graphic` parameter is a single sprite or a row / grid of sprites.
-	 * @param   Width      Specify the width of your sprite
+	 * @param   graphic    The image you want to use.
+	 * @param   animated   Whether the `Graphic` parameter is a single sprite or a row / grid of sprites.
+	 * @param   width      Specify the width of your sprite
 	 *                     (helps figure out what to do with non-square sprites or sprite sheets).
-	 * @param   Height     Specify the height of your sprite
+	 * @param   height     Specify the height of your sprite
 	 *                     (helps figure out what to do with non-square sprites or sprite sheets).
-	 * @param   Unique     Whether the graphic should be a unique instance in the graphics cache.
+	 * @param   unique     Whether the graphic should be a unique instance in the graphics cache.
 	 *                     Set this to `true` if you want to modify the `pixels` field without changing
 	 *                     the `pixels` of other sprites with the same `BitmapData`.
-	 * @param   Key        Set this parameter if you're loading `BitmapData`.
+	 * @param   key        Set this parameter if you're loading `BitmapData`.
 	 * @return  This `FlxSprite` instance (nice for chaining stuff together, if you're into that).
 	 */
-	public function loadGraphic(Graphic:FlxGraphicAsset, Animated:Bool = false, Width:Int = 0, Height:Int = 0, Unique:Bool = false, ?Key:String):FlxSprite
+	public function loadGraphic(graphic:FlxGraphicAsset, animated:Bool = false, width:Int = 0, height:Int = 0, unique:Bool = false, ?key:String):FlxSprite
 	{
-		var graph:FlxGraphic = FlxG.bitmap.add(Graphic, Unique, Key);
+		var graph:FlxGraphic = FlxG.bitmap.add(graphic, unique, key);
 		if (graph == null)
 			return this;
 
-		if (Width == 0)
+		if (width == 0)
 		{
-			Width = Animated ? graph.height : graph.width;
-			Width = (Width > graph.width) ? graph.width : Width;
+			width = animated ? graph.height : graph.width;
+			width = (width > graph.width) ? graph.width : width;
 		}
 
-		if (Height == 0)
+		if (height == 0)
 		{
-			Height = Animated ? Width : graph.height;
-			Height = (Height > graph.height) ? graph.height : Height;
+			height = animated ? width : graph.height;
+			height = (height > graph.height) ? graph.height : height;
 		}
 
-		if (Animated)
-			frames = FlxTileFrames.fromGraphic(graph, FlxPoint.get(Width, Height));
+		if (animated)
+			frames = FlxTileFrames.fromGraphic(graph, FlxPoint.get(width, height));
 		else
 			frames = graph.imageFrame;
 
