@@ -151,11 +151,11 @@ class FlxPointer
 	{
 		final camera = FlxG.camera;
 		
-		screenX = FlxCoordUtil.windowToCameraX(windowX, camera);
-		screenY = FlxCoordUtil.windowToCameraY(windowY, camera);
+		screenY = Std.int(FlxCoordUtil.windowToCameraY(windowY, camera));
+		screenX = Std.int(FlxCoordUtil.windowToCameraX(windowX, camera));
 		
-		x = FlxCoordUtil.cameraToWorldX(screenX, camera);
-		y = FlxCoordUtil.cameraToWorldY(screenY, camera);
+		x = Std.int(FlxCoordUtil.cameraToWorldX(screenX, camera));
+		y = Std.int(FlxCoordUtil.cameraToWorldY(screenY, camera));
 	}
 	
 	function get__globalScreenX()
