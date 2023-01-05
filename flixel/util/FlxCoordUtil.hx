@@ -380,7 +380,7 @@ class FlxCoordUtil
 		if (camera == null)
 			camera = FlxG.camera;
 		
-		return worldToCameraXUnsafe(worldX, camera);
+		return windowToCameraXUnsafe(worldX, camera);
 	}
 	
 	/**
@@ -393,7 +393,7 @@ class FlxCoordUtil
 		if (camera == null)
 			camera = FlxG.camera;
 		
-		return worldToCameraYUnsafe(windowY, camera);
+		return windowToCameraYUnsafe(windowY, camera);
 	}
 	
 	inline static function windowToCameraXUnsafe(windowX:Float, camera:FlxCamera)
