@@ -32,7 +32,7 @@ class FlxCoordUtil
 	 * via the supplied camera.
 	 * @param windowPos  The position in the game's window.
 	 * @param camera     The camera from which to transform window coordinates. If null, `FlxG.camera` is used.
-	 * @param result     Option point used for the returned result. If null, one is created.
+	 * @param result     Optional point used for the returned result. If null, one is created.
 	**/
 	static public function windowToWorld(windowPos:FlxPoint, ?camera:FlxCamera, ?result:FlxPoint)
 	{
@@ -104,7 +104,7 @@ class FlxCoordUtil
 	 * Takes a position on the game's window and gives a corresponding position in world space, via the supplied camera.
 	 * @param cameraPos  The position in the camera's space.
 	 * @param camera     The camera from which to transform window coordinates. If null, `FlxG.camera` is used.
-	 * @param result     Option point used for the returned result. If null, one is created.
+	 * @param result     Optional point used for the returned result. If null, one is created.
 	**/
 	static public function cameraToWorld(cameraPos:FlxPoint, ?camera:FlxCamera, ?result:FlxPoint)
 	{
@@ -194,7 +194,7 @@ class FlxCoordUtil
 	 * Takes a position in world space and gives a corresponding position in the game's window, via the supplied camera.
 	 * @param worldPos  The position in world space.
 	 * @param camera    The camera from which to transform world's coordinates. If null, `FlxG.camera` is used.
-	 * @param result    Option point used for the returned result. If null, one is created.
+	 * @param result    Optional point used for the returned result. If null, one is created.
 	**/
 	static public function worldToWindow(worldPos:FlxPoint, ?camera:FlxCamera, ?result:FlxPoint)
 	{
@@ -266,7 +266,7 @@ class FlxCoordUtil
 	 * Takes a position in world space and gives a corresponding position in the supplied camera.
 	 * @param worldPos  The position in world space.
 	 * @param camera    The camera from which to transform world's coordinates. If null, `FlxG.camera` is used.
-	 * @param result    Option point used for the returned result. If null, one is created.
+	 * @param result    Optional point used for the returned result. If null, one is created.
 	**/
 	static public function worldToCamera(worldPos:FlxPoint, ?camera:FlxCamera, ?result:FlxPoint)
 	{
@@ -340,7 +340,7 @@ class FlxCoordUtil
 	 * Takes a position in window space and gives a corresponding position in the supplied camera.
 	 * @param windowPos  The position in window space.
 	 * @param camera     The camera from which to transform window coordinates. If null, `FlxG.camera` is used.
-	 * @param result     Option point used for the returned result. If null, one is created.
+	 * @param result     Optional point used for the returned result. If null, one is created.
 	**/
 	static public function windowToCamera(windowPos:FlxPoint, ?camera:FlxCamera, ?result:FlxPoint)
 	{
@@ -412,7 +412,7 @@ class FlxCoordUtil
 	 * Takes a position in the supplied camera and gives a corresponding position in the game's window.
 	 * @param cameraPos  The position in the game's window.
 	 * @param camera     The camera from which to transform world's coordinates. If null, `FlxG.camera` is used.
-	 * @param result     Option point used for the returned result. If null, one is created.
+	 * @param result     Optional point used for the returned result. If null, one is created.
 	**/
 	static public function cameraToWindow(cameraPos:FlxPoint, ?camera:FlxCamera, ?result:FlxPoint)
 	{
@@ -486,7 +486,7 @@ class FlxCoordUtil
 	 * @param worldPos  The position in world space.
 	 * @param fromCam   The camera from which to transform world's coordinates.
 	 * @param toCam     The camera to which to transform world's coordinates.
-	 * @param result    Option point used for the returned result. If null, one is created.
+	 * @param result    Optional point used for the returned result. If null, one is created.
 	**/
 	static public function cameraToCamera(worldPos:FlxPoint, fromCam:FlxCamera, toCam:FlxCamera, ?result:FlxPoint)
 	{
