@@ -4,10 +4,12 @@ import flixel.FlxG;
 import flixel.FlxCamera;
 import flixel.math.FlxPoint;
 
+// TODO: rename?
+
 /**
  * Helper to Convert between coordinate spaces
 **/
-class FlxCoord
+class FlxCoordUtil
 {
 	// --- --- --- WINDOW-TO-WORLD --- --- --- //
 	
