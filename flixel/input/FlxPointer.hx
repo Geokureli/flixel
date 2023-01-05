@@ -3,6 +3,7 @@ package flixel.input;
 import flixel.FlxCamera;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxPoint;
+import flixel.util.FlxCoordUtil;
 import flixel.util.FlxStringUtil;
 
 class FlxPointer
@@ -33,73 +34,40 @@ class FlxPointer
 
 	/**
 	 * Fetch the world position of the pointer on any given camera.
-	 * NOTE: x and y also store the world position of the pointer on the main camera.
+	 * NOTE: `x` and `y` also store the world position of the pointer on `FlxG.camera`.
 	 *
-	 * @param 	Camera	If unspecified, first/main global camera is used instead.
-	 * @param 	point	An existing point object to store the results (if you don't want a new one created).
-	 * @return 	The touch point's location in world space.
+	 * @param   camera  If unspecified, first/main global camera is used instead.
+	 * @param   result  Optional point used for the returned result. If null, one is created.
+	 * @return  The pointer's location in world space.
 	 */
-	public function getWorldPosition(?Camera:FlxCamera, ?point:FlxPoint):FlxPoint
+	public function getWorldPosition(?camera:FlxCamera, ?result:FlxPoint):FlxPoint
 	{
-		if (Camera == null)
-		{
-			Camera = FlxG.camera;
-		}
-		if (point == null)
-		{
-			point = FlxPoint.get();
-		}
-		getScreenPosition(Camera, _cachedPoint);
-		point.x = _cachedPoint.x + Camera.scroll.x;
-		point.y = _cachedPoint.y + Camera.scroll.y;
-		return point;
+		return FlxCoordUtil.windowToWorldXY(windowX, windowY, camera, result);
 	}
 
 	/**
 	 * Fetch the screen position of the pointer on any given camera.
-	 * NOTE: screenX and screenY also store the screen position of the pointer on the main camera.
+	 * NOTE: `screenX` and `screenY` also store the screen position of the pointer on `FlxG.camera`.
 	 *
-	 * @param 	Camera	If unspecified, first/main global camera is used instead.
-	 * @param 	point		An existing point object to store the results (if you don't want a new one created).
-	 * @return 	The touch point's location in screen space.
+	 * @param   camera  If unspecified, first/main global camera is used instead.
+	 * @param   result  Optional point used for the returned result. If null, one is created.
+	 * @return  The pointer's location in screen space.
 	 */
-	public function getScreenPosition(?Camera:FlxCamera, ?point:FlxPoint):FlxPoint
+	public inline function getScreenPosition(?camera:FlxCamera, ?result:FlxPoint):FlxPoint
 	{
-		if (Camera == null)
-		{
-			Camera = FlxG.camera;
-		}
-		if (point == null)
-		{
-			point = FlxPoint.get();
-		}
-
-		point.x = (windowX - Camera.x + 0.5 * Camera.width * (Camera.zoom - Camera.initialZoom)) / Camera.zoom;
-		point.y = (windowY - Camera.y + 0.5 * Camera.height * (Camera.zoom - Camera.initialZoom)) / Camera.zoom;
-
-		return point;
+		return FlxCoordUtil.windowToCameraXY(windowX, windowY, camera, result);
 	}
 
 	/**
 	 * Fetch the screen position of the pointer relative to given camera's viewport.
 	 *
-	 * @param 	Camera		If unspecified, first/main global camera is used instead.
-	 * @param 	point		An existing point object to store the results (if you don't want a new one created).
-	 * @return 	The touch point's location relative to camera's viewport.
+	 * @param   camera  If unspecified, first/main global camera is used instead.
+	 * @param   result  Optional point used for the returned result. If null, one is created.
+	 * @return  The pointer's location relative to camera's viewport.
 	 */
-	@:access(flixel.FlxCamera)
-	public function getPositionInCameraView(?Camera:FlxCamera, ?point:FlxPoint):FlxPoint
+	public inline function getPositionInCameraView(?camera:FlxCamera, ?result:FlxPoint):FlxPoint
 	{
-		if (Camera == null)
-			Camera = FlxG.camera;
-
-		if (point == null)
-			point = FlxPoint.get();
-
-		point.x = (windowX - Camera.x) / Camera.zoom + Camera.viewMarginX;
-		point.y = (windowY - Camera.y) / Camera.zoom + Camera.viewMarginY;
-
-		return point;
+		return getScreenPosition(camera, result);
 	}
 
 	/**
@@ -117,21 +85,21 @@ class FlxPointer
 	 * If the group has a LOT of things in it, it might be faster to use FlxG.overlaps().
 	 * WARNING: Currently tilemaps do NOT support screen space overlap checks!
 	 *
-	 * @param 	ObjectOrGroup The object or group being tested.
-	 * @param 	Camera Specify which game camera you want. If null getScreenPosition() will just grab the first global camera.
-	 * @return 	Whether or not the two objects overlap.
+	 * @param   objectOrGroup  The object or group being tested.
+	 * @param   camera         Specify which game camera you want. If null getScreenPosition() will just grab the first global camera.
+	 * @return  Whether or not the two objects overlap.
 	 */
 	@:access(flixel.group.FlxTypedGroup.resolveGroup)
-	public function overlaps(ObjectOrGroup:FlxBasic, ?Camera:FlxCamera):Bool
+	public function overlaps(objectOrGroup:FlxBasic, ?camera:FlxCamera):Bool
 	{
 		var result:Bool = false;
 
-		var group = FlxTypedGroup.resolveGroup(ObjectOrGroup);
+		var group = FlxTypedGroup.resolveGroup(objectOrGroup);
 		if (group != null)
 		{
 			group.forEachExists(function(basic:FlxBasic)
 			{
-				if (overlaps(basic, Camera))
+				if (overlaps(basic, camera))
 				{
 					result = true;
 					return;
@@ -141,8 +109,8 @@ class FlxPointer
 		else
 		{
 			getPosition(_cachedPoint);
-			var object:FlxObject = cast ObjectOrGroup;
-			result = object.overlapsPoint(_cachedPoint, true, Camera);
+			var object:FlxObject = cast objectOrGroup;
+			result = object.overlapsPoint(_cachedPoint, true, camera);
 		}
 
 		return result;
@@ -181,13 +149,13 @@ class FlxPointer
 	 */
 	function updatePositions():Void
 	{
-		getScreenPosition(FlxG.camera, _cachedPoint);
-		screenX = Std.int(_cachedPoint.x);
-		screenY = Std.int(_cachedPoint.y);
-
-		getWorldPosition(FlxG.camera, _cachedPoint);
-		x = Std.int(_cachedPoint.x);
-		y = Std.int(_cachedPoint.y);
+		final camera = FlxG.camera;
+		
+		screenX = FlxCoordUtil.windowToCameraX(windowX, camera);
+		screenY = FlxCoordUtil.windowToCameraY(windowY, camera);
+		
+		x = FlxCoordUtil.cameraToWorldX(screenX, camera);
+		y = FlxCoordUtil.cameraToWorldY(screenY, camera);
 	}
 	
 	function get__globalScreenX()
