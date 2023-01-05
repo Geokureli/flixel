@@ -7,14 +7,25 @@ import flixel.util.FlxStringUtil;
 
 class FlxPointer
 {
+	/** The position in world-space when converted via FlxG.camera */
 	public var x(default, null):Int = 0;
+	/** The position in world-space when converted via FlxG.camera */
 	public var y(default, null):Int = 0;
 
+	/** The position in FlxG.camera's screen-space */
 	public var screenX(default, null):Int = 0;
+	/** The position in FlxG.camera's screen-space */
 	public var screenY(default, null):Int = 0;
 
-	var _globalScreenX:Int = 0;
-	var _globalScreenY:Int = 0;
+	/** The raw position in the application's window */
+	public var windowX(default, null):Int = 0;
+	/** The raw position in the application's window */
+	public var windowY(default, null):Int = 0;
+
+	@:deprecated("_globalScreenX is deprecated, use windowX")
+	var _globalScreenX(get, set):Int;
+	@:deprecated("_globalScreenY is deprecated, use windowY")
+	var _globalScreenY(get, set):Int;
 
 	static var _cachedPoint:FlxPoint = new FlxPoint();
 
@@ -63,8 +74,8 @@ class FlxPointer
 			point = FlxPoint.get();
 		}
 
-		point.x = (_globalScreenX - Camera.x + 0.5 * Camera.width * (Camera.zoom - Camera.initialZoom)) / Camera.zoom;
-		point.y = (_globalScreenY - Camera.y + 0.5 * Camera.height * (Camera.zoom - Camera.initialZoom)) / Camera.zoom;
+		point.x = (windowX - Camera.x + 0.5 * Camera.width * (Camera.zoom - Camera.initialZoom)) / Camera.zoom;
+		point.y = (windowY - Camera.y + 0.5 * Camera.height * (Camera.zoom - Camera.initialZoom)) / Camera.zoom;
 
 		return point;
 	}
@@ -85,8 +96,8 @@ class FlxPointer
 		if (point == null)
 			point = FlxPoint.get();
 
-		point.x = (_globalScreenX - Camera.x) / Camera.zoom + Camera.viewMarginX;
-		point.y = (_globalScreenY - Camera.y) / Camera.zoom + Camera.viewMarginY;
+		point.x = (windowX - Camera.x) / Camera.zoom + Camera.viewMarginX;
+		point.y = (windowY - Camera.y) / Camera.zoom + Camera.viewMarginY;
 
 		return point;
 	}
@@ -141,10 +152,20 @@ class FlxPointer
 	 * Directly set the underyling screen position variable. WARNING! You should never use
 	 * this unless you are trying to manually dispatch low-level mouse / touch events to the stage.
 	 */
+	@:deprecated("setGlobalScreenPositionUnsafe is deprecated, use setWindowPositionUnsafe")
 	public inline function setGlobalScreenPositionUnsafe(newX:Float, newY:Float):Void
 	{
-		_globalScreenX = Std.int(newX / FlxG.scaleMode.scale.x);
-		_globalScreenY = Std.int(newY / FlxG.scaleMode.scale.y);
+		setWindowPositionUnsafe(newX, newY);
+	}
+
+	/**
+	 * Directly set the underyling screen position variable. WARNING! You should never use
+	 * this unless you are trying to manually dispatch low-level mouse / touch events to the stage.
+	 */
+	public inline function setWindowPositionUnsafe(newX:Float, newY:Float):Void
+	{
+		windowX = Std.int(newX / FlxG.scaleMode.scale.x);
+		windowY = Std.int(newY / FlxG.scaleMode.scale.y);
 
 		updatePositions();
 	}
@@ -167,5 +188,25 @@ class FlxPointer
 		getWorldPosition(FlxG.camera, _cachedPoint);
 		x = Std.int(_cachedPoint.x);
 		y = Std.int(_cachedPoint.y);
+	}
+	
+	function get__globalScreenX()
+	{
+		return windowX;
+	}
+	
+	function get__globalScreenY()
+	{
+		return windowY;
+	}
+	
+	function set__globalScreenX(value:Int)
+	{
+		return windowX = value;
+	}
+	
+	function set__globalScreenY(value:Int)
+	{
+		return windowY = value;
 	}
 }

@@ -472,7 +472,7 @@ class FlxMouse extends FlxPointer implements IFlxInputManager
 		_prevY = y;
 
 		#if !FLX_UNIT_TEST // Travis segfaults when game.mouseX / Y is accessed
-		setGlobalScreenPositionUnsafe(FlxG.game.mouseX, FlxG.game.mouseY);
+		setWindowPositionUnsafe(FlxG.game.mouseX, FlxG.game.mouseY);
 
 		// actually position the flixel mouse cursor graphic
 		if (visible)
@@ -689,16 +689,16 @@ class FlxMouse extends FlxPointer implements IFlxInputManager
 	@:allow(flixel.system.replay.FlxReplay)
 	function record():MouseRecord
 	{
-		if ((_lastX == _globalScreenX)
-			&& (_lastY == _globalScreenY)
+		if ((_lastX == windowX)
+			&& (_lastY == windowY)
 			&& (_lastLeftButtonState == _leftButton.current)
 			&& (_lastWheel == wheel))
 		{
 			return null;
 		}
 
-		_lastX = _globalScreenX;
-		_lastY = _globalScreenY;
+		_lastX = windowX;
+		_lastY = windowY;
 		_lastLeftButtonState = _leftButton.current;
 		_lastWheel = wheel;
 		return new MouseRecord(_lastX, _lastY, _leftButton.current, _lastWheel);
@@ -717,8 +717,8 @@ class FlxMouse extends FlxPointer implements IFlxInputManager
 		}
 		_lastLeftButtonState = _leftButton.current = record.button;
 		wheel = record.wheel;
-		_globalScreenX = record.x;
-		_globalScreenY = record.y;
+		windowX = record.x;
+		windowY = record.y;
 		updatePositions();
 	}
 }
