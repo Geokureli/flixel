@@ -1196,7 +1196,6 @@ class FlxTilemap extends FlxBaseTilemap<FlxTile>
 	 * @param   buffer  The FlxTilemapBuffer you are rendering to.
 	 * @param   camera  The related FlxCamera, mainly for scroll values.
 	 */
-	@:access(flixel.FlxCamera)
 	function drawTilemap(buffer:FlxTilemapBuffer, camera:FlxCamera):Void
 	{
 		var isColored:Bool = (alpha != 1) || (color != 0xffffff);
@@ -1227,8 +1226,8 @@ class FlxTilemap extends FlxBaseTilemap<FlxTile>
 		}
 
 		// Copy tile images into the tile buffer
-		_point.x = (camera.scroll.x * scrollFactor.x) - x - offset.x + camera.viewOffsetX; // modified from getScreenPosition()
-		_point.y = (camera.scroll.y * scrollFactor.y) - y - offset.y + camera.viewOffsetY;
+		_point.x = (camera.scroll.x * scrollFactor.x) - x - offset.x + camera.viewMarginX; // modified from getScreenPosition()
+		_point.y = (camera.scroll.y * scrollFactor.y) - y - offset.y + camera.viewMarginY;
 
 		var screenXInTiles:Int = Math.floor(_point.x / scaledTileWidth);
 		var screenYInTiles:Int = Math.floor(_point.y / scaledTileHeight);
