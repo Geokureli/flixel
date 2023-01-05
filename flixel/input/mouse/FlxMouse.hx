@@ -472,7 +472,7 @@ class FlxMouse extends FlxPointer implements IFlxInputManager
 		_prevY = y;
 
 		#if !FLX_UNIT_TEST // Travis segfaults when game.mouseX / Y is accessed
-		setWindowPositionUnsafe(FlxG.game.mouseX, FlxG.game.mouseY);
+		setWindowPositionUnsafe(FlxG.game.mouseX + FlxG.game.x, FlxG.game.mouseY + FlxG.game.y);
 
 		// actually position the flixel mouse cursor graphic
 		if (visible)

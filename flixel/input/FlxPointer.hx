@@ -123,7 +123,7 @@ class FlxPointer
 	@:deprecated("setGlobalScreenPositionUnsafe is deprecated, use setWindowPositionUnsafe")
 	public inline function setGlobalScreenPositionUnsafe(newX:Float, newY:Float):Void
 	{
-		setWindowPositionUnsafe(newX, newY);
+		setWindowPositionUnsafe(newX + FlxG.game.x, newY + FlxG.game.y);
 	}
 
 	/**
@@ -151,11 +151,11 @@ class FlxPointer
 	{
 		final camera = FlxG.camera;
 		
-		screenY = Std.int(FlxCoordUtil.windowToCameraY(windowY, camera));
-		screenX = Std.int(FlxCoordUtil.windowToCameraX(windowX, camera));
+		screenX = Math.round(FlxCoordUtil.windowToCameraX(windowX, camera));
+		screenY = Math.round(FlxCoordUtil.windowToCameraY(windowY, camera));
 		
-		x = Std.int(FlxCoordUtil.cameraToWorldX(screenX, camera));
-		y = Std.int(FlxCoordUtil.cameraToWorldY(screenY, camera));
+		x = Math.round(FlxCoordUtil.windowToWorldX(windowX, camera));
+		y = Math.round(FlxCoordUtil.windowToWorldY(windowY, camera));
 	}
 	
 	function get__globalScreenX()
