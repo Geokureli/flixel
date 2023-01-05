@@ -95,15 +95,12 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 	/**
 	 * Function for updating touch coordinates. Called by the TouchManager.
 	 *
-	 * @param	X	stageX touch coordinate
-	 * @param	Y	stageY touch coordinate
+	 * @param   x  stageX touch coordinate
+	 * @param   y  stageY touch coordinate
 	 */
-	function setXY(X:Int, Y:Int):Void
+	function setXY(x:Int, y:Int):Void
 	{
-		flashPoint.setTo(X, Y);
-		flashPoint = FlxG.game.globalToLocal(flashPoint);
-
-		setGlobalScreenPositionUnsafe(flashPoint.x, flashPoint.y);
+		setWindowPositionUnsafe(x, y);
 	}
 
 	inline function get_touchPointID():Int

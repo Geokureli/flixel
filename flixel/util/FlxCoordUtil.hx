@@ -511,7 +511,6 @@ class FlxCoordUtil
 		return result.set(cameraToCameraX(worldX, fromCam, toCam), cameraToCameraY(worldY, fromCam, toCam));
 	}
 	
-	static var p = new openfl.geom.Point(0, 0);
 	/**
 	 * TODO: description
 	 * @param worldX   The world x position.
