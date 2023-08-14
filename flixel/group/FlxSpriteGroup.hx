@@ -214,13 +214,12 @@ class FlxTypedSpriteGroup<T:FlxSprite> extends FlxSprite
 	{
 		group.update(elapsed);
 		
-		last.set(x, y);
-		
-		if (moves)
-			updateMotion(elapsed);
-		
-		wasTouching = touching;
-		touching = FlxObject.NONE;
+		super.update(elapsed);
+	}
+	
+	override function updateAnimation(elapsed:Float)
+	{
+		// super.updateAnimation(elapsed);
 	}
 
 	override public function draw():Void
