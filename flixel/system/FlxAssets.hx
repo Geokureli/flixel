@@ -1,19 +1,25 @@
 package flixel.system;
 
+import haxe.macro.Expr;
 #if !macro
-import flash.display.BitmapData;
-import flash.display.Graphics;
-import flash.media.Sound;
+import openfl.display.BitmapData;
+import openfl.display.Graphics;
+import openfl.media.Sound;
 import flixel.FlxG;
 import flixel.graphics.FlxGraphic;
+import flixel.graphics.FlxAsepriteUtil;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.graphics.frames.FlxFrame;
 import flixel.graphics.frames.FlxFramesCollection;
 import flixel.util.typeLimit.OneOfFour;
 import flixel.util.typeLimit.OneOfThree;
 import flixel.util.typeLimit.OneOfTwo;
+import haxe.Json;
+import haxe.xml.Access;
 import openfl.Assets;
 import openfl.utils.ByteArray;
+
+using StringTools;
 
 @:keep @:bitmap("assets/images/logo/logo.png")
 class GraphicLogo extends BitmapData {}
@@ -24,13 +30,74 @@ class GraphicVirtualInput extends BitmapData {}
 @:file("assets/images/ui/virtual-input.txt")
 class VirtualInputData extends #if (lime_legacy || nme) ByteArray #else ByteArrayData #end {}
 
-typedef FlxAngelCodeSource = OneOfTwo<Xml, String>;
-typedef FlxTexturePackerSource = OneOfTwo<String, TexturePackerObject>;
+typedef FlxAngelCodeXmlAsset = FlxXmlAsset;
+typedef FlxTexturePackerJsonAsset = FlxJsonAsset<TexturePackerAtlas>;
+typedef FlxAsepriteJsonAsset = FlxJsonAsset<AseAtlas>;
 typedef FlxSoundAsset = OneOfThree<String, Sound, Class<Sound>>;
 typedef FlxGraphicAsset = OneOfThree<FlxGraphic, BitmapData, String>;
 typedef FlxGraphicSource = OneOfThree<BitmapData, Class<Dynamic>, String>;
 typedef FlxTilemapGraphicAsset = OneOfFour<FlxFramesCollection, FlxGraphic, BitmapData, String>;
 typedef FlxBitmapFontGraphicAsset = OneOfFour<FlxFrame, FlxGraphic, BitmapData, String>;
+
+@:deprecated("`FlxAngelCodeSource` is deprecated, use `FlxAngelCodeAsset` instead")
+typedef FlxAngelCodeSource = FlxAngelCodeXmlAsset;
+
+@:deprecated("`FlxTexturePackerSource` is deprecated, use `FlxAtlasDataAsset` instead")
+typedef FlxTexturePackerSource = FlxTexturePackerJsonAsset;
+
+abstract FlxXmlAsset(OneOfTwo<Xml, String>) from Xml from String
+{
+	public function getXml()
+	{
+		if ((this is String))
+		{
+			final str:String = cast this;
+			if (Assets.exists(str))
+				return fromPath(str);
+
+			return fromXmlString(str);
+		}
+
+		return cast(this, Xml);
+	}
+
+	static inline function fromPath<T>(path:String):Xml
+	{
+		return fromXmlString(Assets.getText(path));
+	}
+
+	static inline function fromXmlString<T>(data:String):Xml
+	{
+		return Xml.parse(data);
+	}
+}
+
+abstract FlxJsonAsset<T>(OneOfTwo<T, String>) from T from String
+{
+	public function getData():T
+	{
+		if ((this is String))
+		{
+			final str:String = cast this;
+			if (Assets.exists(str))
+				return fromPath(str);
+
+			return fromDataString(str);
+		}
+
+		return cast this;
+	}
+
+	static inline function fromPath<T>(path:String):T
+	{
+		return fromDataString(Assets.getText(path));
+	}
+
+	static inline function fromDataString<T>(data:String):T
+	{
+		return cast Json.parse(data);
+	}
+}
 
 typedef FlxShader =
 	#if (openfl_legacy || nme)
@@ -44,37 +111,100 @@ typedef FlxShader =
 
 class FlxAssets
 {
+	/**
+	 * The default sound format to be assumed when unspecified, only affects calls to
+	 * `FlxAssets.getSound` which are not common. Currently set to ".ogg" on non-flash targets
+	 * for backwards compatibility reasons.
+	 */
+	public static var defaultSoundExtension = #if flash "mp3" #else "ogg" #end;
+
 	#if (macro || doc_gen)
 	/**
 	 * Reads files from a directory relative to this project and generates `public static inline`
 	 * variables containing the string paths to the files in it.
-	 *
-	 * Example usage:
-	 *
+	 * 
+	 * **Example usage:**
+	 * 
 	 * ```haxe
-	 * @:build(flixel.system.FlxAssets.buildFileReferences("assets/images"))
+	 * @:build(flixel.system.FlxAssets.buildFileReferences("assets/images/"))
 	 * class Images {}
 	 * ```
-	 *
-	 * Mostly copied from:
-	 * @author Mark Knol
-	 * @see http://blog.stroep.nl/2014/01/haxe-macros/
-	 *
-	 * @param   directory          The directory to scan for files
-	 * @param   subDirectories     Whether to include subdirectories
-	 * @param   filterExtensions   Example: `["jpg", "png", "gif"]` will only add files with that extension.
-	 */
-	public static function buildFileReferences(directory:String = "assets/", subDirectories:Bool = false,
-			?filterExtensions:Array<String>, ?rename:String->String):Array<haxe.macro.Expr.Field>
+	 * 
+	 * **Renaming Duplicates**
+	 * 
+	 * If you have files with the same names, whichever file is nested deeper or found later 
+	 * will be ignored. You can provide `rename` function to deal with this case. The function takes a filepath 
+	 * (a relative filepath from the `Project.xml`) and returns a field name used to access that path. 
+	 * Returning `null` means "ignore the file".
+	 * 
+	 * ```haxe
+	 * // assets structure:
+	 * // assets/music/hero.ogg
+	 * // assets/sounds/hero.ogg
+	 * 
+	 * // AssetPaths.hx
+	 * @:build(flixel.system.FlxAssets.buildFileReferences("assets", true, null, null,
+	 * 	function renameFileName(name:String):Null<String>
+	 * 	{
+	 * 		return name.toLowerCase()
+	 * 			.split("/").join("_")
+	 * 			.split("-").join("_")
+	 * 			.split(" ").join("_")
+	 * 			.split(".").join("__");
+	 * 	}
+	 * ))
+	 * class AssetPaths {}
+	 * 
+	 * // somewhere in your code
+	 * FlxG.sound.play(AssetPaths.assets_music_hero__ogg);
+	 * FlxG.sound.play(AssetPaths.assets_sounds_hero__ogg);
+	 * ```
+	 * 
+	 * @param   directory       The directory to scan for files
+	 * @param   subDirectories  Whether to include subdirectories
+	 * @param   include         A string or `EReg` of files to include
+	 *                          Example: `"*.jpg\|*.png\|*.gif"` will only add files with that extension
+	 * @param   exclude         A string or `EReg` of files to exclude. Example: `"*exclude/*\|*.ogg"`
+	 *                          will exclude .ogg files and everything in the exclude folder
+	 * @param   rename          A function that takes the file path and returns a valid haxe field name
+	 * @param   listField       If not an empty string, it adds static public field with the given
+	 *                          name with an array of every file in the directory
+	 * 
+	 * @see [Flixel 5.0.0 Migration guide - AssetPaths has less caveats](https://github.com/HaxeFlixel/flixel/wiki/Flixel-5.0.0-Migration-guide#assetpaths-has-less-caveats-2575)
+	 * @see [Haxe Macros: Code completion for everything](http://blog.stroep.nl/2014/01/haxe-macros/)
+	**/
+	public static function buildFileReferences(directory = "assets/", subDirectories = false, ?include:Expr, ?exclude:Expr,
+			?rename:String->Null<String>, listField = "allFiles"):Array<Field>
 	{
 		#if doc_gen
 		return [];
 		#else
-		return flixel.system.macros.FlxAssetPaths.buildFileReferences(directory, subDirectories, filterExtensions, rename);
+		final buildRefs = flixel.system.macros.FlxAssetPaths.buildFileReferences;
+		return buildRefs(directory, subDirectories, exprToRegex(include), exprToRegex(exclude), rename, listField);
 		#end
 	}
-	#end
 
+	#if !doc_gen
+	static function exprToRegex(expr:Expr):EReg
+	{
+		switch (expr.expr)
+		{
+			case null | EConst(CIdent("null")):
+				return null;
+			case EConst(CString(s, _)):
+				s = EReg.escape(s);
+				s = StringTools.replace(s, "\\*", ".*");
+				s = StringTools.replace(s, "\\|", "|");
+				return new EReg("^" + s + "$", "");
+			case EConst(CRegexp(r, opt)):
+				return new EReg(r, opt);
+			default:
+				haxe.macro.Context.error("Value must be a string or regular expression.", expr.pos);
+				return null;
+		}
+	}
+	#end
+	#end
 	#if (!macro || doc_gen)
 	// fonts
 	public static var FONT_DEFAULT:String = "Nokia Cellphone FC Small";
@@ -217,15 +347,19 @@ class FlxAssets
 		return null;
 	}
 
-	public static inline function getSound(id:String):Sound
+	/**
+	 * Loads an OpenFL sound asset from the given asset id. If an extension not provided the 
+	 * `defaultSoundExtension` is used (defaults to "ogg" on non-flash targets).
+	 * 
+	 * @param   id  The asset id of the local sound file.
+	 * @return  The sound file.
+	 */
+	public static function getSound(id:String):Sound
 	{
-		var extension = "";
-		#if flash
-		extension = ".mp3";
-		#else
-		extension = ".ogg";
-		#end
-		return Assets.getSound(id + extension);
+		if (!id.endsWith(".mp3") && !id.endsWith(".ogg") && !id.endsWith(".wav"))
+			id += "." + defaultSoundExtension;
+
+		return Assets.getSound(id);
 	}
 
 	public static function getVirtualInputFrames():FlxAtlasFrames

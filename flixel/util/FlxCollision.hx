@@ -1,16 +1,16 @@
 package flixel.util;
 
-import flash.display.BitmapData;
-import flash.geom.Rectangle;
+import openfl.display.BitmapData;
+import openfl.geom.Rectangle;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.group.FlxGroup;
 import flixel.math.FlxAngle;
 import flixel.math.FlxMath;
-import flixel.math.FlxRect;
-import flixel.math.FlxVector;
 import flixel.math.FlxMatrix;
+import flixel.math.FlxPoint;
+import flixel.math.FlxRect;
 import flixel.tile.FlxTileblock;
 
 /**
@@ -22,10 +22,10 @@ import flixel.tile.FlxTileblock;
 class FlxCollision
 {
 	// Optimization: Local static vars to reduce allocations
-	static var pointA:FlxVector = new FlxVector();
-	static var pointB:FlxVector = new FlxVector();
-	static var centerA:FlxVector = new FlxVector();
-	static var centerB:FlxVector = new FlxVector();
+	static var pointA:FlxPoint = new FlxPoint();
+	static var pointB:FlxPoint = new FlxPoint();
+	static var centerA:FlxPoint = new FlxPoint();
+	static var centerB:FlxPoint = new FlxPoint();
 	static var matrixA:FlxMatrix = new FlxMatrix();
 	static var matrixB:FlxMatrix = new FlxMatrix();
 	static var testMatrix:FlxMatrix = new FlxMatrix();
@@ -91,7 +91,6 @@ class FlxCollision
 
 			// translate it back!
 			testMatrix.translate(boundsA.width / 2, boundsA.height / 2);
-			
 
 			// prepare an empty canvas
 			var testA2:BitmapData = FlxBitmapDataPool.get(Math.floor(boundsA.width), Math.floor(boundsA.height), true, FlxColor.TRANSPARENT, false);
@@ -179,39 +178,24 @@ class FlxCollision
 	}
 
 	/**
-	 * A Pixel Perfect Collision check between a given x/y coordinate and an FlxSprite
+	 * Checks to see if a point in 2D world space overlaps this `FlxSprite` object's
+	 * current displayed pixels. This check is ALWAYS made in screen space, and
+	 * factors in `scale`, `angle`, `offset`, `origin`, and `scrollFactor`.
 	 *
-	 * @param	PointX			The x coordinate of the point given in local space (relative to the FlxSprite, not game world coordinates)
-	 * @param	PointY			The y coordinate of the point given in local space (relative to the FlxSprite, not game world coordinates)
-	 * @param	Target			The FlxSprite to check the point against
-	 * @param	AlphaTolerance	The alpha tolerance level above which pixels are counted as colliding. Default to 1 (anything that is not fully invisible).
-	 * @return	Boolean True if the x/y point collides with the FlxSprite, false if not
+	 * @param   worldX          The x coordinate of the point given in world space
+	 * @param   worldY          The y coordinate of the point given in world space
+	 * @param   sprite          The FlxSprite to check the point against
+	 * @param   alphaTolerance  The alpha tolerance for with pixels are considered "solid".
+	 *                          Defaults to 1 (anything that is not fully invisible).
+	 * @return  Whether the x/y point overlaps with the sprite, false if not
 	 */
-	public static function pixelPerfectPointCheck(PointX:Int, PointY:Int, Target:FlxSprite, AlphaTolerance:Int = 1):Bool
+	@:deprecated("Use sprite.pixelsOverlapPoint instead")
+	public static function pixelPerfectPointCheck(worldX:Int, worldY:Int, target:FlxSprite, alphaTolerance = 1):Bool
 	{
-		// Intersect check
-		if (!FlxMath.pointInCoordinates(PointX, PointY, Math.floor(Target.x), Math.floor(Target.y), Std.int(Target.width), Std.int(Target.height)))
-		{
-			return false;
-		}
-
 		if (FlxG.renderTile)
-		{
-			Target.drawFrame();
-		}
-
-		// How deep is pointX/Y within the rect?
-		var test:BitmapData = Target.framePixels;
-
-		var pixelAlpha = FlxColor.fromInt(test.getPixel32(Math.floor(PointX - Target.x), Math.floor(PointY - Target.y))).alpha;
-
-		if (FlxG.renderTile)
-		{
-			pixelAlpha = Std.int(pixelAlpha * Target.alpha);
-		}
-
-		// How deep is pointX/Y within the rect?
-		return pixelAlpha >= AlphaTolerance;
+			target.drawFrame();
+		
+		return target.pixelsOverlapPoint(FlxPoint.weak(worldX, worldY), alphaTolerance);
 	}
 
 	/**
@@ -232,8 +216,8 @@ class FlxCollision
 
 		if (PlaceOutside)
 		{
-			left = new FlxTileblock(Math.floor(Camera.x - Thickness), Math.floor(Camera.y + Thickness), Thickness, Camera.height - (Thickness * 2));
-			right = new FlxTileblock(Math.floor(Camera.x + Camera.width), Math.floor(Camera.y + Thickness), Thickness, Camera.height - (Thickness * 2));
+			left = new FlxTileblock(Math.floor(Camera.x - Thickness), Math.floor(Camera.y), Thickness, Camera.height);
+			right = new FlxTileblock(Math.floor(Camera.x + Camera.width), Math.floor(Camera.y), Thickness, Camera.height);
 			top = new FlxTileblock(Math.floor(Camera.x - Thickness), Math.floor(Camera.y - Thickness), Camera.width + Thickness * 2, Thickness);
 			bottom = new FlxTileblock(Math.floor(Camera.x - Thickness), Camera.height, Camera.width + Thickness * 2, Thickness);
 
@@ -282,7 +266,7 @@ class FlxCollision
 	 *                Only returned if the line enters the rect.
 	 * @return The point of entry of the line into the rect, if possible.
 	 */
-	public static function calcRectEntry(rect:FlxRect, start:FlxVector, end:FlxVector, ?result:FlxVector):Null<FlxVector>
+	public static function calcRectEntry(rect:FlxRect, start:FlxPoint, end:FlxPoint, ?result:FlxPoint):Null<FlxPoint>
 	{
 		// We must ensure that weak refs are placed back in the pool
 		inline function putWeakRefs()
@@ -298,10 +282,10 @@ class FlxCollision
 		function getResult(x:Float, y:Float)
 		{
 			if (result == null)
-				result = FlxVector.get(x, y);
+				result = FlxPoint.get(x, y);
 			else
 				result.set(x, y);
-			
+
 			putWeakRefs();
 			return result;
 		}

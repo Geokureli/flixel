@@ -1,14 +1,14 @@
 package flixel.input.mouse;
 
 #if FLX_MOUSE
-import flash.display.Bitmap;
-import flash.display.BitmapData;
-import flash.display.Sprite;
-import flash.display.Stage;
-import flash.events.Event;
-import flash.events.MouseEvent;
-import flash.Lib;
-import flash.ui.Mouse;
+import openfl.display.Bitmap;
+import openfl.display.BitmapData;
+import openfl.display.Sprite;
+import openfl.display.Stage;
+import openfl.events.Event;
+import openfl.events.MouseEvent;
+import openfl.Lib;
+import openfl.ui.Mouse;
 import flixel.FlxG;
 import flixel.input.IFlxInputManager;
 import flixel.input.FlxInput.FlxInputState;
@@ -17,10 +17,10 @@ import flixel.system.FlxAssets;
 import flixel.system.replay.MouseRecord;
 import flixel.util.FlxDestroyUtil;
 #if FLX_NATIVE_CURSOR
-import flash.Vector;
-import flash.geom.Matrix;
-import flash.geom.Point;
-import flash.ui.MouseCursor;
+import openfl.Vector;
+import openfl.geom.Matrix;
+import openfl.geom.Point;
+import openfl.ui.MouseCursor;
 import flash.ui.MouseCursorData;
 #end
 
@@ -68,6 +68,26 @@ class FlxMouse extends FlxPointer implements IFlxInputManager
 	 * @since 4.4.0
 	 */
 	public var justMoved(get, never):Bool;
+
+	/**
+	 * Distance in pixels the mouse has moved since the last frame in the X direction.
+	 */
+	public var deltaX(get, never):Int;
+
+	/**
+	 * Distance in pixels the mouse has moved since the last frame in the Y direction.
+	 */
+	public var deltaY(get, never):Int;
+
+	/**
+	 * Distance in pixels the mouse has moved in screen space since the last frame in the X direction.
+	 */
+	public var deltaScreenX(get, never):Int;
+
+	/**
+	 * Distance in pixels the mouse has moved in screen space since the last frame in the Y direction.
+	 */
+	public var deltaScreenY(get, never):Int;
 
 	/**
 	 * Check to see if the left mouse button is currently pressed.
@@ -191,11 +211,12 @@ class FlxMouse extends FlxPointer implements IFlxInputManager
 	var _lastLeftButtonState:FlxInputState;
 
 	/**
-	 * Helper variables to see if the mouse has moved since the last update.
+	 * Helper variables to see if the mouse has moved since the last update, and by how much.
 	 */
 	var _prevX:Int = 0;
-
 	var _prevY:Int = 0;
+	var _prevScreenX:Int = 0;
+	var _prevScreenY:Int = 0;
 
 	// Helper variable for cleaning up memory
 	var _stage:Stage;
@@ -470,6 +491,8 @@ class FlxMouse extends FlxPointer implements IFlxInputManager
 	{
 		_prevX = x;
 		_prevY = y;
+		_prevScreenX = screenX;
+		_prevScreenY = screenY;
 
 		#if !FLX_UNIT_TEST // Travis segfaults when game.mouseX / Y is accessed
 		setGlobalScreenPositionUnsafe(FlxG.game.mouseX, FlxG.game.mouseY);
@@ -561,6 +584,18 @@ class FlxMouse extends FlxPointer implements IFlxInputManager
 
 	inline function get_justMoved():Bool
 		return _prevX != x || _prevY != y;
+
+	inline function get_deltaX():Int
+		return x - _prevX;
+
+	inline function get_deltaY():Int
+		return y - _prevY;
+
+	inline function get_deltaScreenX():Int
+		return screenX - _prevScreenX;
+
+	inline function get_deltaScreenY():Int
+		return screenY - _prevScreenY;
 
 	inline function get_pressed():Bool
 		return _leftButton.pressed;

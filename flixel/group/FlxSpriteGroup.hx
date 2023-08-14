@@ -1,7 +1,7 @@
 package flixel.group;
 
-import flash.display.BitmapData;
-import flash.display.BlendMode;
+import openfl.display.BitmapData;
+import openfl.display.BlendMode;
 import flixel.FlxCamera;
 import flixel.FlxSprite;
 import flixel.graphics.frames.FlxFrame;
@@ -16,6 +16,10 @@ import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxSort;
 
+/**
+ * An alias for `FlxTypedSpriteGroup<FlxSprite>`, meaning any sprite can be added to a
+ * `FlxSpriteGroup`, even another `FlxSpriteGroup`.
+ */
 typedef FlxSpriteGroup = FlxTypedSpriteGroup<FlxSprite>;
 
 /**
@@ -833,25 +837,72 @@ class FlxTypedSpriteGroup<T:FlxSprite> extends FlxSprite
 
 		if (length == 0)
 			return 0;
+		
+		return findMaxXHelper() - findMinXHelper();
+	}
 
-		var minX:Float = Math.POSITIVE_INFINITY;
-		var maxX:Float = Math.NEGATIVE_INFINITY;
-
+	/**
+	 * Returns the left-most position of the left-most member.
+	 * If there are no members, x is returned.
+	 * 
+	 * @since 5.0.0
+	 */
+	public function findMinX()
+	{
+		return length == 0 ? x : findMinXHelper();
+	}
+	
+	function findMinXHelper()
+	{
+		var value = Math.POSITIVE_INFINITY;
 		for (member in _sprites)
 		{
 			if (member == null)
 				continue;
-			var minMemberX:Float = member.x;
-			var maxMemberX:Float = minMemberX + member.width;
-
-			if (maxMemberX > maxX)
-				maxX = maxMemberX;
-			if (minMemberX < minX)
-				minX = minMemberX;
+			
+			var minX:Float;
+			if (member.flixelType == SPRITEGROUP)
+				minX = (cast member:FlxSpriteGroup).findMinX();
+			else
+				minX = member.x;
+			
+			if (minX < value)
+				value = minX;
 		}
-		return maxX - minX;
+		return value;
 	}
-
+	
+	/**
+	 * Returns the right-most position of the right-most member.
+	 * If there are no members, x is returned.
+	 * 
+	 * @since 5.0.0
+	 */
+	public function findMaxX()
+	{
+		return length == 0 ? x : findMaxXHelper();
+	}
+	
+	function findMaxXHelper()
+	{
+		var value = Math.NEGATIVE_INFINITY;
+		for (member in _sprites)
+		{
+			if (member == null)
+				continue;
+			
+			var maxX:Float;
+			if (member.flixelType == SPRITEGROUP)
+				maxX = (cast member:FlxSpriteGroup).findMaxX();
+			else
+				maxX = member.x + member.width;
+			
+			if (maxX > value)
+				value = maxX;
+		}
+		return value;
+	}
+	
 	/**
 	 * FlxSpriteGroups ignore this property unless `singleCollider` is set to true
 	 */
@@ -870,23 +921,70 @@ class FlxTypedSpriteGroup<T:FlxSprite> extends FlxSprite
 
 		if (length == 0)
 			return 0;
-
-		var minY:Float = Math.POSITIVE_INFINITY;
-		var maxY:Float = Math.NEGATIVE_INFINITY;
-
+		
+		return findMaxYHelper() - findMinYHelper();
+	}
+	
+	/**
+	 * Returns the top-most position of the top-most member.
+	 * If there are no members, y is returned.
+	 * 
+	 * @since 5.0.0
+	 */
+	public function findMinY()
+	{
+		return length == 0 ? y : findMinYHelper();
+	}
+	
+	function findMinYHelper()
+	{
+		var value = Math.POSITIVE_INFINITY;
 		for (member in _sprites)
 		{
 			if (member == null)
 				continue;
-			var minMemberY:Float = member.y;
-			var maxMemberY:Float = minMemberY + member.height;
-
-			if (maxMemberY > maxY)
-				maxY = maxMemberY;
-			if (minMemberY < minY)
-				minY = minMemberY;
+			
+			var minY:Float;
+			if (member.flixelType == SPRITEGROUP)
+				minY = (cast member:FlxSpriteGroup).findMinY();
+			else
+				minY = member.y;
+			
+			if (minY < value)
+				value = minY;
 		}
-		return maxY - minY;
+		return value;
+	}
+	
+	/**
+	 * Returns the top-most position of the top-most member.
+	 * If there are no members, y is returned.
+	 * 
+	 * @since 5.0.0
+	 */
+	public function findMaxY()
+	{
+		return length == 0 ? y : findMaxYHelper();
+	}
+	
+	function findMaxYHelper()
+	{
+		var value = Math.NEGATIVE_INFINITY;
+		for (member in _sprites)
+		{
+			if (member == null)
+				continue;
+			
+			var maxY:Float;
+			if (member.flixelType == SPRITEGROUP)
+				maxY = (cast member:FlxSpriteGroup).findMaxY();
+			else
+				maxY = member.y + member.height;
+			
+			if (maxY > value)
+				value = maxY;
+		}
+		return value;
 	}
 
 	// GROUP FUNCTIONS

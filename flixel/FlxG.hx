@@ -1,10 +1,10 @@
 package flixel;
 
-import flash.Lib;
-import flash.display.DisplayObject;
-import flash.display.Stage;
-import flash.display.StageDisplayState;
-import flash.net.URLRequest;
+import openfl.Lib;
+import openfl.display.DisplayObject;
+import openfl.display.Stage;
+import openfl.display.StageDisplayState;
+import openfl.net.URLRequest;
 import flixel.effects.postprocess.PostProcess;
 import flixel.math.FlxMath;
 import flixel.math.FlxRandom;
@@ -49,8 +49,8 @@ import flixel.input.FlxAccelerometer;
 import flixel.input.FlxSwipe;
 #end
 #if FLX_POST_PROCESS
-import openfl.display.OpenGLView;
 import flixel.util.FlxDestroyUtil;
+import openfl.display.OpenGLView;
 
 using flixel.util.FlxArrayUtil;
 #end
@@ -99,7 +99,7 @@ class FlxG
 	 * The HaxeFlixel version, in semantic versioning syntax. Use `Std.string()`
 	 * on it to get a `String` formatted like this: `"HaxeFlixel MAJOR.MINOR.PATCH-COMMIT_SHA"`.
 	 */
-	public static var VERSION(default, null):FlxVersion = new FlxVersion(5, 0, 0);
+	public static var VERSION(default, null):FlxVersion = new FlxVersion(5, 4, 0);
 
 	/**
 	 * Internal tracker for game object.
@@ -190,11 +190,13 @@ class FlxG
 	 */
 	public static var worldBounds(default, null):FlxRect = FlxRect.get();
 
+	#if FLX_SAVE
 	/**
 	 * A `FlxSave` used internally by flixel to save sound preferences and
 	 * the history of the console window, but no reason you can't use it for your own stuff too!
 	 */
 	public static var save(default, null):FlxSave = new FlxSave();
+	#end
 
 	/**
 	 * A `FlxRandom` object which can be used to generate random numbers.
@@ -313,7 +315,6 @@ class FlxG
 
 	public static var initialWidth(default, null):Int = 0;
 	public static var initialHeight(default, null):Int = 0;
-	public static var initialZoom(default, null):Float = 0;
 
 	#if FLX_SOUND_SYSTEM
 	/**
@@ -369,8 +370,18 @@ class FlxG
 	 */
 	public static inline function switchState(nextState:FlxState):Void
 	{
-		if (state.switchTo(nextState))
-			game._requestedState = nextState;
+		final stateOnCall = FlxG.state;
+		// Use reflection to avoid deprecation warning on switchTo
+		if (Reflect.field(state, 'switchTo')(nextState))
+		{
+			state.startOutro(function()
+			{
+				if (FlxG.state == stateOnCall)
+					game._requestedState = nextState;
+				else
+					FlxG.log.warn("`onOutroComplete` was called after the state was switched. This will be ignored");
+			});
+		}
 	}
 
 	/**
@@ -571,7 +582,7 @@ class FlxG
 	 * Called by `FlxGame` to set up `FlxG` during `FlxGame`'s constructor.
 	 */
 	@:allow(flixel.FlxGame.new)
-	static function init(Game:FlxGame, Width:Int, Height:Int, Zoom:Float):Void
+	static function init(Game:FlxGame, Width:Int, Height:Int):Void
 	{
 		game = Game;
 		width = Std.int(Math.abs(Width));
@@ -581,7 +592,6 @@ class FlxG
 
 		FlxG.initialWidth = width;
 		FlxG.initialHeight = height;
-		FlxG.initialZoom = FlxCamera.defaultZoom = Zoom;
 
 		resizeGame(Lib.current.stage.stageWidth, Lib.current.stage.stageHeight);
 
@@ -609,7 +619,10 @@ class FlxG
 		#if FLX_ACCELEROMETER
 		accelerometer = new FlxAccelerometer();
 		#end
-		save.bind("flixel");
+
+		#if FLX_SAVE
+		initSave();
+		#end
 
 		plugins = new PluginFrontEnd();
 		vcr = new VCRFrontEnd();
@@ -662,6 +675,22 @@ class FlxG
 
 		FlxObject.defaultPixelPerfectPosition = renderBlit;
 	}
+
+	#if FLX_SAVE
+	static function initSave()
+	{
+		// Don't init if the FlxG.save.bind was manually called before the FlxGame was created
+		if (save.isBound)
+			return;
+
+		// Use Project.xml data to determine save id (since 5.0.0).
+		final name = stage.application.meta["file"];
+		save.bind(FlxSave.validate(name));
+		// look for the pre 5.0 save and convert it if it exists.
+		if (save.isEmpty())
+			save.mergeDataFrom("flixel", null, false, false);
+	}
+	#end
 
 	/**
 	 * Called whenever the game is reset, doesn't have to do quite as much work as the basic initialization stuff.

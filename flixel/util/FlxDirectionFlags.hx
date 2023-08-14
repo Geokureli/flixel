@@ -7,7 +7,7 @@ import flixel.math.FlxAngle;
  * many `FlxObject` features like `allowCollisions` and `touching`.
  * @since 4.10.0
  */
-@:enum abstract FlxDirectionFlags(Int) from Int from FlxDirection to Int
+enum abstract FlxDirectionFlags(Int) from Int from FlxDirection to Int
 {
 	var LEFT = 0x0001; // FlxDirection.LEFT;
 	var RIGHT = 0x0010; // FlxDirection.RIGHT;
@@ -66,11 +66,19 @@ import flixel.math.FlxAngle;
 	}
 
 	/**
-	 * Returns true if this contains all of the supplied flags.
+	 * Returns true if this contains **all** of the supplied flags.
 	 */
 	public inline function has(dir:FlxDirectionFlags):Bool
 	{
 		return this & dir == dir;
+	}
+
+	/**
+	 * Returns true if this contains **any** of the supplied flags.
+	 */
+	public inline function hasAny(dir:FlxDirectionFlags):Bool
+	{
+		return this & dir > 0;
 	}
 
 	/**
