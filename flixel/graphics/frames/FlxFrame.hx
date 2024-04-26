@@ -1,8 +1,5 @@
 package flixel.graphics.frames;
 
-import openfl.display.BitmapData;
-import openfl.geom.Point;
-import openfl.geom.Rectangle;
 import flixel.graphics.FlxGraphic;
 import flixel.math.FlxMath;
 import flixel.math.FlxMatrix;
@@ -13,6 +10,9 @@ import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxStringUtil;
 import haxe.ds.ArraySort;
 import haxe.ds.Vector;
+import openfl.display.BitmapData;
+import openfl.geom.Point;
+import openfl.geom.Rectangle;
 
 /**
  * Base class for all frame types
@@ -88,8 +88,7 @@ class FlxFrame implements IFlxDestroyable
 	@:deprecated("sortByName is deprecated, use sortFramesByName")
 	public static function sortByName(frame1:FlxFrame, frame2:FlxFrame, prefixLength:Int, suffixLength:Int):Int
 	{
-		return getNameOrderLegacy(frame1.name, prefixLength, suffixLength)
-			- getNameOrderLegacy(frame2.name, prefixLength, suffixLength);
+		return getNameOrderLegacy(frame1.name, prefixLength, suffixLength) - getNameOrderLegacy(frame2.name, prefixLength, suffixLength);
 	}
 	
 	static inline function getNameOrderLegacy(name:String, prefixLength:Int, suffixLength:Int):Int
@@ -142,6 +141,7 @@ class FlxFrame implements IFlxDestroyable
 	}
 	
 	static final nameOrderReg = ~/^(.*?)((?:0x)?[0-9]+)(.*?)$/;
+	
 	static function getNameInvalidChars(name:String, prefix:String, suffix:String):String
 	{
 		final start = prefix != null ? prefix.length : 0;
@@ -151,13 +151,12 @@ class FlxFrame implements IFlxDestroyable
 		
 		if (order == null && nameOrderReg.match(section))
 			return nameOrderReg.matched(1);
-		
+			
 		if (order < 0)
 			return "-";
-		
+			
 		return null;
 	}
-
 	
 	public static function sortFramesByName(frame1:FlxFrame, frame2:FlxFrame, prefix:String, suffix:String):Int
 	{
@@ -171,17 +170,21 @@ class FlxFrame implements IFlxDestroyable
 	
 	static function getNameOrder(name:String, prefix:String, suffix:String, warn = true):Int
 	{
-		inline function logWarning (msg) { if (warn) FlxG.log.warn(msg); }
+		inline function logWarning(msg)
+		{
+			if (warn)
+				FlxG.log.warn(msg);
+		}
 		
 		final end = name.length - (suffix != null ? suffix.length : 0);
 		final start = prefix != null ? prefix.length : 0;
 		final section = name.substring(start, end);
-		var order:Null<Int> = Std.parseInt(section);
+		final order:Null<Int> = Std.parseInt(section);
 		
 		if (order == null)
 		{
 			logWarning('Could not parse frame number of "$section" in frame named "$name"');
-			return null;
+			return 0;
 		}
 		
 		if (order < 0)
@@ -194,54 +197,54 @@ class FlxFrame implements IFlxDestroyable
 	}
 	
 	public var name:String;
-
+	
 	/**
 	 * Region of the image to render.
 	 */
 	public var frame(default, set):FlxRect;
-
+	
 	/**
 	 * UV coordinates for this frame.
 	 * WARNING: For optimization purposes, width and height of this rect
 	 * contain right and bottom coordinates (`x + width` and `y + height`).
 	 */
 	public var uv:FlxRect;
-
+	
 	public var parent:FlxGraphic;
-
+	
 	/**
 	 * Rotation angle of this frame.
 	 * Required for packed atlas images.
 	 */
 	public var angle:FlxFrameAngle;
-
+	
 	public var flipX:Bool;
 	public var flipY:Bool;
-
+	
 	/**
 	 * Original (uncropped) image size.
 	 */
 	public var sourceSize(default, null):FlxPoint;
-
+	
 	/**
 	 * Frame offset from top left corner of original image.
 	 */
 	public var offset(default, null):FlxPoint;
-
+	
 	/**
 	 * The duration of this frame in seconds. If 0, the anim controller will decide the duration
 	 */
 	public var duration:Float;
-
+	
 	/**
 	 * The type of this frame.
 	 */
 	public var type:FlxFrameType;
-
+	
 	var tileMatrix:Vector<Float>;
-
+	
 	var blitMatrix:Vector<Float>;
-
+	
 	@:allow(flixel.graphics.FlxGraphic)
 	@:allow(flixel.graphics.frames.FlxFramesCollection)
 	function new(parent:FlxGraphic, angle = FlxFrameAngle.ANGLE_0, flipX = false, flipY = false, duration = 0.0)
@@ -251,17 +254,17 @@ class FlxFrame implements IFlxDestroyable
 		this.flipX = flipX;
 		this.flipY = flipY;
 		this.duration = duration;
-
+		
 		type = FlxFrameType.REGULAR;
-
+		
 		sourceSize = FlxPoint.get();
 		offset = FlxPoint.get();
-
+		
 		blitMatrix = new Vector<Float>(6);
 		if (FlxG.renderTile)
 			tileMatrix = new Vector<Float>(6);
 	}
-
+	
 	@:allow(flixel.graphics.frames.FlxFramesCollection)
 	@:allow(flixel.graphics.frames.FlxBitmapFont)
 	function cacheFrameMatrix():Void
@@ -273,7 +276,7 @@ class FlxFrame implements IFlxDestroyable
 		blitMatrix[3] = _matrix.d;
 		blitMatrix[4] = _matrix.tx;
 		blitMatrix[5] = _matrix.ty;
-
+		
 		if (FlxG.renderTile)
 		{
 			prepareBlitMatrix(_matrix, false);
@@ -285,7 +288,7 @@ class FlxFrame implements IFlxDestroyable
 			tileMatrix[5] = _matrix.ty;
 		}
 	}
-
+	
 	/**
 	 * Applies frame rotation to the specified matrix, which should be used for tiling or blitting.
 	 * Required for rotated frame support.
@@ -297,10 +300,10 @@ class FlxFrame implements IFlxDestroyable
 	inline function prepareBlitMatrix(mat:FlxMatrix, blit:Bool = true):FlxMatrix
 	{
 		mat.identity();
-
+		
 		if (blit)
 			mat.translate(-frame.x, -frame.y);
-
+			
 		if (angle == FlxFrameAngle.ANGLE_90)
 		{
 			mat.rotateByPositive90();
@@ -311,11 +314,11 @@ class FlxFrame implements IFlxDestroyable
 			mat.rotateByNegative90();
 			mat.translate(0, frame.width);
 		}
-
+		
 		mat.translate(offset.x, offset.y);
 		return mat;
 	}
-
+	
 	/**
 	 * Rotates and flips matrix. This method expects matrix which was prepared by `prepareBlitMatrix()`.
 	 * Internal use only.
@@ -330,14 +333,14 @@ class FlxFrame implements IFlxDestroyable
 	{
 		var w:Int = Std.int(sourceSize.x);
 		var h:Int = Std.int(sourceSize.y);
-
+		
 		// rotate frame transformation matrix if rotation isn't zero
 		if (rotation != FlxFrameAngle.ANGLE_0)
 		{
 			var t:Int = w;
 			w = h;
 			h = t;
-
+			
 			if (rotation == FlxFrameAngle.ANGLE_90)
 			{
 				mat.rotateByPositive90();
@@ -349,23 +352,23 @@ class FlxFrame implements IFlxDestroyable
 				mat.translate(0, sourceSize.x);
 			}
 		}
-
+		
 		// flip frame transformation matrix
 		if (flipX)
 		{
 			mat.scale(-1, 1);
 			mat.translate(w, 0);
 		}
-
+		
 		if (flipY)
 		{
 			mat.scale(1, -1);
 			mat.translate(0, h);
 		}
-
+		
 		return mat;
 	}
-
+	
 	/**
 	 * Prepares matrix for frame blitting (see `paint` methods).
 	 *
@@ -380,7 +383,7 @@ class FlxFrame implements IFlxDestroyable
 		mat = fillBlitMatrix(mat);
 		return rotateAndFlip(mat, rotation, flipX, flipY);
 	}
-
+	
 	/**
 	 * Prepares matrix for frame tile/triangles rendering.
 	 *
@@ -397,23 +400,23 @@ class FlxFrame implements IFlxDestroyable
 			mat.identity();
 			return mat;
 		}
-
+		
 		mat.a = tileMatrix[0];
 		mat.b = tileMatrix[1];
 		mat.c = tileMatrix[2];
 		mat.d = tileMatrix[3];
 		mat.tx = tileMatrix[4];
 		mat.ty = tileMatrix[5];
-
+		
 		var doFlipX = flipX != this.flipX;
 		var doFlipY = flipY != this.flipY;
-
+		
 		if (rotation == FlxFrameAngle.ANGLE_0 && !doFlipX && !doFlipY)
 			return mat;
-
+			
 		return rotateAndFlip(mat, rotation, doFlipX, doFlipY);
 	}
-
+	
 	inline function fillBlitMatrix(mat:FlxMatrix):FlxMatrix
 	{
 		mat.a = blitMatrix[0];
@@ -424,7 +427,7 @@ class FlxFrame implements IFlxDestroyable
 		mat.ty = blitMatrix[5];
 		return mat;
 	}
-
+	
 	/**
 	 * Draws frame on specified `BitmapData` object.
 	 *
@@ -440,10 +443,10 @@ class FlxFrame implements IFlxDestroyable
 	public function paint(?bmd:BitmapData, ?point:Point, mergeAlpha = false, disposeIfNotEqual = false):BitmapData
 	{
 		bmd = checkInputBitmap(bmd, point, FlxFrameAngle.ANGLE_0, mergeAlpha, disposeIfNotEqual);
-
+		
 		if (type == FlxFrameType.EMPTY)
 			return bmd;
-
+			
 		if (angle == FlxFrameAngle.ANGLE_0)
 		{
 			offset.copyToFlash(_point);
@@ -460,10 +463,10 @@ class FlxFrame implements IFlxDestroyable
 				
 			bmd.draw(parent.bitmap, _matrix, null, null, getDrawFrameRect(_matrix, _rect));
 		}
-
+		
 		return bmd;
 	}
-
+	
 	/**
 	 * Draws rotated and flipped frame on specified BitmapData object.
 	 *
@@ -484,12 +487,12 @@ class FlxFrame implements IFlxDestroyable
 	{
 		if (type == FlxFrameType.EMPTY && rotation == FlxFrameAngle.ANGLE_0)
 			return paint(bmd, point, mergeAlpha, disposeIfNotEqual);
-
+			
 		bmd = checkInputBitmap(bmd, point, rotation, mergeAlpha, disposeIfNotEqual);
-
+		
 		if (type == FlxFrameType.EMPTY)
 			return bmd;
-
+			
 		final doFlipX = flipX != this.flipX;
 		final doFlipY = flipY != this.flipY;
 		
@@ -501,7 +504,7 @@ class FlxFrame implements IFlxDestroyable
 		bmd.draw(parent.bitmap, _matrix, null, null, getDrawFrameRect(_matrix, _rect));
 		return bmd;
 	}
-
+	
 	/**
 	 * Internal method which runs few checks on specified `BitmapData` object.
 	 *
@@ -520,10 +523,10 @@ class FlxFrame implements IFlxDestroyable
 		final flipXY = rotation != FlxFrameAngle.ANGLE_0;
 		final w = Std.int(flipXY ? sourceSize.y : sourceSize.x);
 		final h = Std.int(flipXY ? sourceSize.x : sourceSize.y);
-
+		
 		if (bmd != null && disposeIfNotEqual)
 			bmd = FlxDestroyUtil.disposeIfNotEqual(bmd, w, h);
-
+			
 		if (bmd != null && !mergeAlpha)
 		{
 			if (point != null)
@@ -537,10 +540,10 @@ class FlxFrame implements IFlxDestroyable
 		{
 			bmd = new BitmapData(w, h, true, FlxColor.TRANSPARENT);
 		}
-
+		
 		return bmd;
 	}
-
+	
 	/**
 	 * Internal method which prepares frame rect for blitting.
 	 * Required for rotated frames support.
@@ -553,16 +556,16 @@ class FlxFrame implements IFlxDestroyable
 	{
 		final p1 = FlxPoint.weak(frame.x, frame.y);
 		final p2 = FlxPoint.weak(frame.right, frame.bottom);
-
+		
 		p1.transform(mat);
 		p2.transform(mat);
-
+		
 		final flxRect = FlxRect.get().fromTwoPoints(p1, p2);
 		flxRect.copyToFlash(rect);
 		flxRect.put();
 		return rect;
 	}
-
+	
 	/**
 	 * Generates frame with specified subregion of this frame.
 	 *
@@ -582,9 +585,9 @@ class FlxFrame implements IFlxDestroyable
 			frameToFill.angle = angle;
 			frameToFill.frame = FlxDestroyUtil.put(frameToFill.frame);
 		}
-
+		
 		frameToFill.sourceSize.set(rect.width, rect.height);
-
+		
 		// no need to make all calculations if original frame is empty...
 		if (type == FlxFrameType.EMPTY)
 		{
@@ -592,22 +595,22 @@ class FlxFrame implements IFlxDestroyable
 			frameToFill.offset.set(0, 0);
 			return frameToFill;
 		}
-
+		
 		var clippedRect:FlxRect = FlxRect.get().setSize(frame.width, frame.height);
 		if (angle != FlxFrameAngle.ANGLE_0)
 		{
 			clippedRect.width = frame.height;
 			clippedRect.height = frame.width;
 		}
-
+		
 		var ox:Float = Math.max(offset.x, 0);
 		var oy:Float = Math.max(offset.y, 0);
-
+		
 		rect.offset(-ox, -oy);
 		var frameRect:FlxRect = clippedRect.intersection(rect);
 		clippedRect = FlxDestroyUtil.put(clippedRect);
 		rect.offset(ox, oy);
-
+		
 		if (frameRect.isEmpty)
 		{
 			frameToFill.type = FlxFrameType.EMPTY;
@@ -619,12 +622,12 @@ class FlxFrame implements IFlxDestroyable
 		{
 			frameToFill.type = FlxFrameType.REGULAR;
 			frameToFill.offset.set(frameRect.x, frameRect.y).subtract(rect.x, rect.y).addPoint(offset);
-
+			
 			final p1 = FlxPoint.weak(frameRect.x, frameRect.y);
 			final p2 = FlxPoint.weak(frameRect.right, frameRect.bottom);
-
+			
 			_matrix.identity();
-
+			
 			if (angle == FlxFrameAngle.ANGLE_NEG_90)
 			{
 				_matrix.rotateByPositive90();
@@ -635,22 +638,22 @@ class FlxFrame implements IFlxDestroyable
 				_matrix.rotateByNegative90();
 				_matrix.translate(0, frame.height);
 			}
-
+			
 			if (angle != FlxFrameAngle.ANGLE_0)
 			{
 				p1.transform(_matrix);
 				p2.transform(_matrix);
 			}
-
+			
 			frameRect.fromTwoPoints(p1, p2);
 			frameRect.offset(frame.x, frame.y);
 			frameToFill.frame = frameRect;
 			frameToFill.cacheFrameMatrix();
 		}
-
+		
 		return frameToFill;
 	}
-
+	
 	/**
 	 * Just a helper method for some frame adjusting.
 	 * Try to not use it, since it may cause memory leaks.
@@ -666,7 +669,7 @@ class FlxFrame implements IFlxDestroyable
 		FlxDestroyUtil.put(rect);
 		return frameToFill;
 	}
-
+	
 	/**
 	 * Frame clipping
 	 *
@@ -687,10 +690,10 @@ class FlxFrame implements IFlxDestroyable
 			clippedFrame.angle = angle;
 			clippedFrame.frame = FlxDestroyUtil.put(clippedFrame.frame);
 		}
-
+		
 		clippedFrame.sourceSize.copyFrom(sourceSize);
 		clippedFrame.name = name;
-
+		
 		// no need to make all calculations if original frame is empty...
 		if (type == FlxFrameType.EMPTY)
 		{
@@ -698,18 +701,18 @@ class FlxFrame implements IFlxDestroyable
 			clippedFrame.offset.set(0, 0);
 			return clippedFrame;
 		}
-
+		
 		final clippedRect:FlxRect = FlxRect.get(0, 0).setSize(frame.width, frame.height);
 		if (angle != FlxFrameAngle.ANGLE_0)
 		{
 			clippedRect.width = frame.height;
 			clippedRect.height = frame.width;
 		}
-
+		
 		clip.offset(-offset.x, -offset.y);
 		var frameRect:FlxRect = clippedRect.intersection(clip);
 		clippedRect.put();
-
+		
 		if (frameRect.isEmpty)
 		{
 			clippedFrame.type = FlxFrameType.EMPTY;
@@ -721,12 +724,12 @@ class FlxFrame implements IFlxDestroyable
 		{
 			clippedFrame.type = FlxFrameType.REGULAR;
 			clippedFrame.offset.set(frameRect.x, frameRect.y).addPoint(offset);
-
+			
 			var p1 = FlxPoint.weak(frameRect.x, frameRect.y);
 			var p2 = FlxPoint.weak(frameRect.right, frameRect.bottom);
-
+			
 			_matrix.identity();
-
+			
 			if (angle == FlxFrameAngle.ANGLE_NEG_90)
 			{
 				_matrix.rotateByPositive90();
@@ -737,23 +740,23 @@ class FlxFrame implements IFlxDestroyable
 				_matrix.rotateByNegative90();
 				_matrix.translate(0, frame.height);
 			}
-
+			
 			if (angle != FlxFrameAngle.ANGLE_0)
 			{
 				p1.transform(_matrix);
 				p2.transform(_matrix);
 			}
-
+			
 			frameRect.fromTwoPoints(p1, p2);
 			frameRect.offset(frame.x, frame.y);
 			clippedFrame.frame = frameRect;
 			clippedFrame.cacheFrameMatrix();
 		}
-
+		
 		clip.offset(offset.x, offset.y);
 		return clippedFrame;
 	}
-
+	
 	/**
 	 * Copies data from this frame into specified frame.
 	 *
@@ -772,7 +775,7 @@ class FlxFrame implements IFlxDestroyable
 			clone.angle = angle;
 			clone.frame = FlxDestroyUtil.put(clone.frame);
 		}
-
+		
 		clone.offset.copyFrom(offset);
 		clone.flipX = flipX;
 		clone.flipY = flipY;
@@ -783,7 +786,7 @@ class FlxFrame implements IFlxDestroyable
 		clone.cacheFrameMatrix();
 		return clone;
 	}
-
+	
 	public function destroy():Void
 	{
 		name = null;
@@ -795,22 +798,22 @@ class FlxFrame implements IFlxDestroyable
 		blitMatrix = null;
 		tileMatrix = null;
 	}
-
+	
 	public function toString():String
 	{
 		return FlxStringUtil.getDebugString([LabelValuePair.weak("name", name)]);
 	}
-
+	
 	function set_frame(value:FlxRect):FlxRect
 	{
 		if (value != null)
 		{
 			if (uv == null)
 				uv = FlxRect.get();
-
+				
 			uv.set(value.x / parent.width, value.y / parent.height, value.right / parent.width, value.bottom / parent.height);
 		}
-
+		
 		return frame = value;
 	}
 }
