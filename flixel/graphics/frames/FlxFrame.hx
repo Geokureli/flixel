@@ -46,7 +46,7 @@ class FlxFrame implements IFlxDestroyable
 	 */
 	public static inline function sortFrames(frames:Array<FlxFrame>, prefix:String, ?suffix:String, warn = true):Void
 	{
-		sortHelper(frames, prefix.length, suffix == null ? 0 : suffix.length, warn);
+		sortFramesHelper(frames, prefix, suffix, warn);
 	}
 	
 	/**
@@ -59,43 +59,140 @@ class FlxFrame implements IFlxDestroyable
 	 * @param suffix  Everything in the frames' name *after* the order
 	 * @param warn    Whether to warn on invalid names
 	 */
+	@:deprecated("sort is deprecated, use sortFrames")
 	public static function sort(frames:Array<FlxFrame>, prefixLength:Int, suffixLength:Int, warn = true):Void
 	{
-		sortHelper(frames, prefixLength, suffixLength, warn);
+		sortLegacyHelper(frames, prefixLength, suffixLength, warn);
 	}
 	
-	static function sortHelper(frames:Array<FlxFrame>, prefixLength:Int, suffixLength:Int, warn = true):Void
+	@:haxe.warning("-WDeprecated")
+	static function sortLegacyHelper(frames:Array<FlxFrame>, prefixLength:Int, suffixLength:Int, warn = true):Void
 	{
 		if (warn)
 		{
 			for (frame in frames)
-				checkValidName(frame.name, prefixLength, suffixLength);
+			{
+				final name = frame.name;
+				final nameSub = name.substring(prefixLength, name.length - suffixLength);
+				final num:Null<Int> = Std.parseInt(nameSub);
+				if (num == null)
+					FlxG.log.warn('Could not parse frame number of "$nameSub" in frame named "$name"');
+				else if (num < 0)
+					FlxG.log.warn('Found negative frame number "$nameSub" in frame named "$name"');
+			}
 		}
 		
 		ArraySort.sort(frames, sortByName.bind(_, _, prefixLength, suffixLength));
 	}
 	
-	static inline function checkValidName(name:String, prefixLength:Int, suffixLength:Int)
-	{
-		final nameSub = name.substring(prefixLength, name.length - suffixLength);
-		final num:Null<Int> = Std.parseInt(nameSub);
-		if (num == null)
-			FlxG.log.warn('Could not parse frame number of "$nameSub" in frame named "$name"');
-		else if (num < 0)
-			FlxG.log.warn('Found negative frame number "$nameSub" in frame named "$name"');
-	}
-	
+	@:deprecated("sortByName is deprecated, use sortFramesByName")
 	public static function sortByName(frame1:FlxFrame, frame2:FlxFrame, prefixLength:Int, suffixLength:Int):Int
 	{
-		inline function getNameOrder(name:String):Int
+		return getNameOrderLegacy(frame1.name, prefixLength, suffixLength)
+			- getNameOrderLegacy(frame2.name, prefixLength, suffixLength);
+	}
+	
+	static inline function getNameOrderLegacy(name:String, prefixLength:Int, suffixLength:Int):Int
+	{
+		final num:Null<Int> = Std.parseInt(name.substring(prefixLength, name.length - suffixLength));
+		return if (num == null) 0 else FlxMath.absInt(num);
+	}
+	
+	static function sortFramesHelper(frames:Array<FlxFrame>, prefix:String, suffix:String, warn = true):Void
+	{
+		if (warn)
 		{
-			final num:Null<Int> = Std.parseInt(name.substring(prefixLength, name.length - suffixLength));
-			return if (num == null) 0 else FlxMath.absInt(num);
+			checkValidFrameNames(frames, prefix, suffix);
 		}
 		
-		return getNameOrder(frame1.name) - getNameOrder(frame2.name);
+		ArraySort.sort(frames, sortFramesByName.bind(_, _, prefix, suffix));
+	}
+	
+	/**
+	 * Determines whether the given prefix/suffix is enough to determine frame order of every frame.
+	 * If they 
+	 */
+	static function checkValidFrameNames(frames:Array<FlxFrame>, prefix:String, suffix:String)
+	{
+		var commonChars = null;
+		for (frame in frames)
+		{
+			// Check for any non-numeric chars preceding the frame order
+			final chars = getNameInvalidChars(frame.name, prefix, suffix);
+			if (commonChars != null && commonChars != chars)
+			{
+				// If any two frames have different preceding tokens, abandon
+				commonChars = null;
+				break;
+			}
+			commonChars = chars;
+		}
+		
+		var newPrefix = prefix;
+		if (commonChars != null)
+		{
+			newPrefix += commonChars;
+			FlxG.log.warn('prefix: "$prefix" should be "$newPrefix"');
+		}
+		else
+		{
+			for (frame in frames)
+				warnInvalidName(frame.name, newPrefix, suffix);
+		}
+	}
+	
+	static final nameOrderReg = ~/^(.*?)((?:0x)?[0-9]+)(.*?)$/;
+	static function getNameInvalidChars(name:String, prefix:String, suffix:String):String
+	{
+		final start = prefix != null ? prefix.length : 0;
+		final end = name.length - (suffix != null ? suffix.length : 0);
+		final section = name.substring(start, end);
+		var order:Null<Int> = Std.parseInt(section);
+		
+		if (order == null && nameOrderReg.match(section))
+			return nameOrderReg.matched(1);
+		
+		if (order < 0)
+			return "-";
+		
+		return null;
 	}
 
+	
+	public static function sortFramesByName(frame1:FlxFrame, frame2:FlxFrame, prefix:String, suffix:String):Int
+	{
+		return getNameOrder(frame1.name, prefix, suffix, false) - getNameOrder(frame2.name, prefix, suffix, false);
+	}
+	
+	static inline function warnInvalidName(name:String, prefix:String, suffix:String):Void
+	{
+		getNameOrder(name, prefix, suffix, true);
+	}
+	
+	static function getNameOrder(name:String, prefix:String, suffix:String, warn = true):Int
+	{
+		inline function logWarning (msg) { if (warn) FlxG.log.warn(msg); }
+		
+		final end = name.length - (suffix != null ? suffix.length : 0);
+		final start = prefix != null ? prefix.length : 0;
+		final section = name.substring(start, end);
+		var order:Null<Int> = Std.parseInt(section);
+		
+		if (order == null)
+		{
+			logWarning('Could not parse frame number of "$section" in frame named "$name"');
+			return null;
+		}
+		
+		if (order < 0)
+		{
+			logWarning('Found negative frame order: $order in frame named "$name"');
+			return -order;
+		}
+		
+		return order;
+	}
+	
 	public var name:String;
 
 	/**
