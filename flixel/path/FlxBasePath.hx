@@ -430,6 +430,14 @@ enum abstract FlxPathLoopType(Int) from Int to Int
 	
 	/** When the end is reached, change direction and continue */
 	var YOYO = 0x001000;
+	
+	/**
+	 * Whether this loops forever, I.E: `LOOP` or `YOYO`
+	 */
+	public function isLooping():Bool
+	{
+		return this == LOOP || this == YOYO;
+	}
 }
 
 /** The direction to traverse the nodes */

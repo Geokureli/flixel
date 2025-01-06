@@ -823,6 +823,7 @@ class FlxObject extends FlxBasic
 	public var ignoreDrawDebug:Bool = false;
 	#end
 
+	#if FLX_PATH
 	/**
 	 * The path this object follows. Not initialized by default.
 	 * Assign a `new FlxPath()` object and `start()` it if you want to this object to follow a path.
@@ -830,6 +831,7 @@ class FlxObject extends FlxBasic
 	 * See `flixel.util.FlxPath` for more info and usage examples.
 	 */
 	public var path(default, set):FlxPath = null;
+	#end
 
 	@:noCompletion
 	var _point:FlxPoint = FlxPoint.get();
@@ -916,10 +918,12 @@ class FlxObject extends FlxBasic
 		#end
 
 		last.set(x, y);
-
+		
+		#if FLX_PATH
 		if (path != null && path.active)
 			path.update(elapsed);
-
+		#end
+		
 		if (moves)
 			updateMotion(elapsed);
 
@@ -1305,6 +1309,7 @@ class FlxObject extends FlxBasic
 		if (ignoreDrawDebug)
 			return;
 		
+		#if FLX_PATH
 		final drawPath = path != null && !path.ignoreDrawDebug;
 		
 		for (camera in getCamerasLegacy())
@@ -1316,6 +1321,7 @@ class FlxObject extends FlxBasic
 				path.drawDebugOnCamera(camera);
 			}
 		}
+		#end
 	}
 
 	/**
@@ -1560,20 +1566,22 @@ class FlxObject extends FlxBasic
 		return debugBoundingBoxColorPartial = color;
 	}
 	#end
-
+	
+	#if FLX_PATH
 	@:noCompletion
 	function set_path(path:FlxPath):FlxPath
 	{
 		if (this.path == path)
 			return path;
-
+		
 		if (this.path != null)
 			this.path.object = null;
-
+		
 		if (path != null)
 			path.object = this;
 		return this.path = path;
 	}
+	#end
 }
 
 /**

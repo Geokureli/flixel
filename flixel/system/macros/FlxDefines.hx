@@ -58,6 +58,10 @@ private enum UserDefines
 	 * If this flag is set to any string, that is used for the file extension
 	 */
 	FLX_DEFAULT_SOUND_EXT;
+	/**
+	 * Removes the `FlxObject.path`, allowing you to implement you're own
+	 */
+	FLX_NO_PATH;
 }
 
 /**
@@ -107,6 +111,7 @@ private enum HelperDefines
 	/** The normalized, absolute path of `FLX_CUSTOM_ASSETS_DIRECTORY`, used internally */
 	FLX_CUSTOM_ASSETS_DIRECTORY_ABS;
 	FLX_NO_DEFAULT_SOUND_EXT;
+	FLX_PATH;
 }
 
 class FlxDefines
@@ -209,6 +214,7 @@ class FlxDefines
 		defineInversion(FLX_TRACK_POOLS, FLX_NO_TRACK_POOLS);
 		defineInversion(FLX_DEFAULT_SOUND_EXT, FLX_NO_DEFAULT_SOUND_EXT);
 		// defineInversion(FLX_TRACK_GRAPHICS, FLX_NO_TRACK_GRAPHICS); // special case
+		defineInversion(FLX_NO_PATH, FLX_PATH);
 	}
 
 	static function defineHelperDefines()

@@ -220,9 +220,11 @@ class FlxTypedSpriteGroup<T:FlxSprite> extends FlxSprite
 	override public function update(elapsed:Float):Void
 	{
 		group.update(elapsed);
-
+		
+		#if FLX_PATH
 		if (path != null && path.active)
 			path.update(elapsed);
+		#end
 
 		if (moves)
 			updateMotion(elapsed);
