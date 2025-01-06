@@ -396,7 +396,7 @@ class FlxTypedBasePath<TTarget:FlxBasic> extends FlxBasic implements IFlxDestroy
 		return result;
 	}
 	
-	inline function drawNode(gfx:Graphics, node:FlxPoint, size:Int, color:FlxColor)
+	function drawNode(gfx:Graphics, node:FlxPoint, size:Int, color:FlxColor)
 	{
 		gfx.beginFill(color.rgb, color.alphaFloat);
 		gfx.lineStyle();
