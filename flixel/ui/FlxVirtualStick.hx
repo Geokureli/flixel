@@ -1,6 +1,5 @@
 package flixel.ui;
 
-import flixel.util.FlxColor;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.group.FlxSpriteContainer;
@@ -13,6 +12,8 @@ import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
 import flixel.system.FlxAssets;
 import flixel.ui.FlxButton;
+import flixel.util.FlxAxes;
+import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxSignal;
 
@@ -38,6 +39,8 @@ class FlxVirtualStick extends FlxSpriteContainer
 	
 	/** The minimum absolute value, to consider this input active */
 	public var deadzone = 0.1;
+	
+	public var invert:FlxAxes = NONE;
 	
 	public final onJustMove = new FlxSignal();
 	public final onJustStop = new FlxSignal();
@@ -128,9 +131,13 @@ class FlxVirtualStick extends FlxSpriteContainer
 			
 			if (pos.x < deadzone && pos.x > -deadzone)
 				pos.x = 0;
+			else if (invert.x)
+				pos.x *= -1;
 			
 			if (pos.y < deadzone && pos.y > -deadzone)
 				pos.y = 0;
+			else if (invert.y)
+				pos.y *= -1;
 		}
 		else
 			pos.zero();
