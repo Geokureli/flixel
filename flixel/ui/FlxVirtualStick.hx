@@ -81,10 +81,6 @@ class FlxVirtualStick extends FlxSpriteContainer
 		
 		moves = false;
 		solid = false;
-		
-		FlxG.watch.addFunction("stick.state", ()->button.status.toString());
-		FlxG.watch.addFunction("base.x|y", ()->'${base.x} | ${base.y}');
-		FlxG.watch.addFunction("thumb.x|y", ()->'${thumb.x} | ${thumb.y}');
 	}
 	
 	override function destroy()
@@ -125,7 +121,7 @@ class FlxVirtualStick extends FlxSpriteContainer
 		final pos:FlxPoint = cast value;
 		if (dragging)
 		{
-			button.calcDeltaToPointer(getCameras()[0], pos);
+			button.calcDeltaToPointer(getDefaultCamera(), pos);
 			pos.scale(1 / radius);
 			if (pos.lengthSquared > 1.0)
 				pos.normalize();
@@ -268,7 +264,7 @@ class InvisibleCircleButton extends FlxTypedButton<FlxSprite>
 			return point.distanceSquaredTo(x + radius, y + radius) < radius * radius;
 
 		if (camera == null)
-			camera = getCameras()[0];
+			camera = getDefaultCamera();
 		
 		return calcDeltaTo(point, camera, _point).lengthSquared < radius * radius;
 	}
