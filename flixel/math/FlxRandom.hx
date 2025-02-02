@@ -184,31 +184,80 @@ class FlxRandom
 	}
 
 	/**
-	 * Returns true or false based on the chance value (default 50%).
-	 * For example if you wanted a player to have a 30.5% chance of getting a bonus,
-	 * call bool(30.5) - true means the chance passed, false means it failed.
+	 * Returns true or false based on the success chance. For example if you
+	 * wanted a 30.5% chance of getting true, call bool(30.5)
 	 *
-	 * @param   Chance   The chance of receiving the value.
-	 *                   Should be given as a number between 0 and 100 (effectively 0% to 100%)
-	 * @return  Whether the roll passed or not.
+	 * @param   successChance  The chance of getting true
 	 */
-	public inline function bool(Chance:Float = 50):Bool
+	@:deprecated("FlxG.random.bool is deprecated, use percent(50) or chance(0.5), instead")
+	public inline function bool(successChance = 50.0):Bool
 	{
-		return float(0, 100) < Chance;
+		return percent(successChance);
 	}
-
+	
+	/**
+	 * Returns true or false based on the success chance. For example if you
+	 * wanted a 30.5% chance of getting true, call percent(30.5)
+	 *
+	 * @param   successChance  The chance of getting true
+	 */
+	public inline function percent(successChance = 50.0):Bool
+	{
+		return float(0, 100) < successChance;
+	}
+	
+	/**
+	 * Returns true or false based on the success chance. For a 30.5% chance of
+	 * getting true, call chance(0.305)
+	 *
+	 * @param   successChance  The chance of getting true
+	 */
+	public inline function chance(successChance = 0.5):Bool
+	{
+		return float(0, 1) < successChance;
+	}
+	
 	/**
 	 * Returns either a 1 or -1.
 	 *
-	 * @param   Chance   The chance of receiving a positive value.
-	 *                   Should be given as a number between 0 and 100 (effectively 0% to 100%)
+	 * @param   successChance  The chance of receiving a positive value.
+	 *                         Should be given as a number between 0 and 100 (effectively 0% to 100%)
+	 */
+	
+	/**
+	 * Returns 1 or -1 based on the success chance. For a 30.5% chance of
+	 * getting a positive value, call sign(30.5)
+	 *
+	 * @param   successChance  The chance of getting a positive value
+	 */
+	@:deprecated("FlxG.random.bool is deprecated, use signPercent(50) or signChance(0.5), instead")
+	public inline function sign(successChance = 50.0):Int
+	{
+		return percent(successChance) ? 1 : -1;
+	}
+	
+	/**
+	 * Returns 1 or -1 based on the success chance. For a 30.5% chance of
+	 * getting a positive value, call signPercent(30.5)
+	 *
+	 * @param   successChance  The chance of getting a positive value
+	 */
+	public inline function signPercent(successChance = 50.0):Int
+	{
+		return percent(successChance) ? 1 : -1;
+	}
+	
+	/**
+	 * Returns either a 1 or -1.
+	 *
+	 * @param   successChance  The chance of receiving a positive value.
 	 * @return  1 or -1
 	 */
-	public inline function sign(Chance:Float = 50):Int
+	public inline function signChance(successChance = 0.5):Int
 	{
-		return bool(Chance) ? 1 : -1;
+		return chance(successChance) ? 1 : -1;
 	}
-
+	
 	/**
 	 * Pseudorandomly select from an array of weighted options. For example, if you passed in an array of [50, 30, 20]
 	 * there would be a 50% chance of returning a 0, a 30% chance of returning a 1, and a 20% chance of returning a 2.
