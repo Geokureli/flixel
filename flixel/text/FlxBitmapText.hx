@@ -1,6 +1,5 @@
 package flixel.text;
 
-import openfl.display.BitmapData;
 import flixel.FlxBasic;
 import flixel.FlxG;
 import flixel.FlxSprite;
@@ -12,6 +11,7 @@ import flixel.text.FlxText.FlxTextAlign;
 import flixel.text.FlxText.FlxTextBorderStyle;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
+import openfl.display.BitmapData;
 import openfl.geom.ColorTransform;
 
 using flixel.util.FlxColorTransformUtil;
@@ -109,7 +109,16 @@ class FlxBitmapText extends FlxSprite
 	 * Height of the text in this text field.
 	 */
 	public var textHeight(get, never):Int;
-
+	
+	/**
+	 * Whether the `width`, `height` `offset` and `origin` are set automatically. Only used when
+	 * `FlxG.renderTile` is `true`.
+	 * 
+	 * **Note:** This behavior can be altered in `autoAdjustBounds`
+	 */
+	public var autoBounds(default, set):Bool = true;
+	
+	
 	/**
 	 * Height of the single line of text (without lineSpacing).
 	 */
@@ -1278,11 +1287,8 @@ class FlxBitmapText extends FlxSprite
 				borderDrawData.splice(0, borderDrawData.length);
 			}
 
-			// use local var to avoid get_width and recursion
-			final newWidth = width = Math.abs(scale.x) * frameWidth;
-			final newHeight = height = Math.abs(scale.y) * frameHeight;
-			offset.set(-0.5 * (newWidth - frameWidth), -0.5 * (newHeight - frameHeight));
-			centerOrigin();
+			if (autoBounds)
+				autoAdjustBounds();
 		}
 
 		if (!useTiles)
@@ -1396,6 +1402,15 @@ class FlxBitmapText extends FlxSprite
 
 		if (pendingPixelsChange)
 			throw "pendingPixelsChange was changed to true while processing changed pixels";
+	}
+	
+	function autoAdjustBounds()
+	{
+		// use local var to avoid get_width and recursion
+		final newWidth = width = Math.abs(scale.x) * frameWidth;
+		final newHeight = height = Math.abs(scale.y) * frameHeight;
+		offset.set(-0.5 * (newWidth - frameWidth), -0.5 * (newHeight - frameHeight));
+		centerOrigin();
 	}
 
 	function drawText(posX:Int, posY:Int, isFront:Bool = true, ?bitmap:BitmapData, useTiles:Bool = false):Void
@@ -1617,6 +1632,14 @@ class FlxBitmapText extends FlxSprite
 			pendingTextChange = true;
 
 		return padding = value;
+	}
+	
+	public function set_autoBounds(value:Bool)
+	{
+		if (FlxG.renderTile && value)
+			autoAdjustBounds();
+		
+		return this.autoBounds = value;
 	}
 
 	function set_numSpacesInTab(value:Int):Int
