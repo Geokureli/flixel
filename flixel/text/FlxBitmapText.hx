@@ -1406,7 +1406,7 @@ class FlxBitmapText extends FlxSprite
 	
 	function autoAdjustBounds()
 	{
-		// use local var to avoid get_width and recursion
+		// use local var to avoid more checkPendingChanges calls
 		final newWidth = width = Math.abs(scale.x) * frameWidth;
 		final newHeight = height = Math.abs(scale.y) * frameHeight;
 		offset.set(-0.5 * (newWidth - frameWidth), -0.5 * (newHeight - frameHeight));
