@@ -9,9 +9,9 @@ import flixel.FlxG;
 import flixel.math.FlxPoint;
 import openfl.events.JoystickEvent;
 #elseif FLX_GAMEINPUT_API
-import flash.ui.GameInput;
-import flash.ui.GameInputDevice;
-import flash.events.GameInputEvent;
+import openfl.ui.GameInput;
+import openfl.ui.GameInputDevice;
+import openfl.events.GameInputEvent;
 
 using flixel.util.FlxStringUtil;
 #end
@@ -50,7 +50,13 @@ class FlxGamepadManager implements IFlxInputManager
 	 * @since 4.6.0
 	 */
 	public var deviceDisconnected(default, null):FlxTypedSignal<FlxGamepad->Void>;
-
+	
+	/**
+	 * Whether the bottom or right face button is ACCEPT
+	 * @since 5.9.0
+	 */
+	public var acceptMode:FlxGamepadAcceptMode = BOTTOM;
+	
 	/**
 	 * Stores all gamepads - can have null entries, but index matches event.device
 	 */
@@ -594,4 +600,28 @@ class FlxGamepadManager implements IFlxInputManager
 				count++;
 		return count;
 	}
+}
+
+/**
+ * @since 5.9.0
+ */
+enum FlxGamepadAcceptMode
+{
+	/**
+	 * The bottom face button is `ACCEPT` and the right face button is `CANCEL`.
+	 * This is common on western-style consoles, like XBox or American PS4/5
+	 */
+	BOTTOM;
+	
+	/**
+	 * The right face button is `ACCEPT` and the bottom face button is `CANCEL`.
+	 * This is common in Japanese PS4/5 consoles, and Nintendo consoles
+	 */
+	RIGHT;
+	
+	/**
+	 * Behaves like `BOTTOM` for nearly all gamepads, but `RIGHT` for specific mappings,
+	 * namely Nintendo Switch gamepads
+	 */
+	USE_MAPPING;
 }

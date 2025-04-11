@@ -1,34 +1,47 @@
 package flixel.group;
 
-import flash.display.BitmapData;
-import flash.display.BlendMode;
+import openfl.display.BitmapData;
+import openfl.display.BlendMode;
 import flixel.FlxCamera;
 import flixel.FlxSprite;
 import flixel.graphics.frames.FlxFrame;
 import flixel.graphics.frames.FlxFramesCollection;
-import flixel.group.FlxGroup.FlxTypedGroup;
-import flixel.group.FlxGroup.FlxTypedGroupIterator;
+import flixel.group.FlxGroup;
 import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
-import flixel.system.FlxAssets.FlxGraphicAsset;
+import flixel.system.FlxAssets;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
+import flixel.util.FlxDirectionFlags;
 import flixel.util.FlxSort;
 
+/**
+ * `FlxSpriteGroup` is a special `FlxSprite` that can be treated like a single sprite even if it's
+ * made up of several member sprites. It shares the `FlxGroup` API, but it doesn't inherit from it.
+ * Note that `FlxSpriteContainer` also exists.
+ * 
+ * ## When to use a group or container
+ * `FlxGroups` are better for organising arbitrary groups for things like iterating or collision.
+ * `FlxContainers` are recommended when you are adding them to the current `FlxState`, or a
+ * child (or grandchild, and so on) of the state.
+ * Since `FlxSpriteGroups` and `FlxSpriteContainers` are usually meant to draw groups of sprites
+ * rather than organizing them for collision or iterating, it's recommended to always use
+ * `FlxSpriteContainer` instead of `FlxSpriteGroup`.
+ */
 typedef FlxSpriteGroup = FlxTypedSpriteGroup<FlxSprite>;
 
 /**
- * `FlxSpriteGroup` is a special `FlxSprite` that can be treated like
- * a single sprite even if it's made up of several member sprites.
- * It shares the `FlxTypedGroup` API, but it doesn't inherit from it.
+ * A `FlxSpriteGroup` that only allows specific members to be a specific type of `FlxSprite`.
+ * To use any kind of `FlxSprite` use `FlxSpriteGroup`, which is an alias for
+ * `FlxTypedSpriteGroup<FlxSprite>`.
  */
 class FlxTypedSpriteGroup<T:FlxSprite> extends FlxSprite
 {
 	/**
 	 * The actual group which holds all sprites.
 	 */
-	public var group:FlxTypedGroup<T>;
+	public var group(default, set):FlxTypedGroup<T>;
 
 	/**
 	 * The link to a group's `members` array.
@@ -62,20 +75,25 @@ class FlxTypedSpriteGroup<T:FlxSprite> extends FlxSprite
 	 * Array of all the `FlxSprite`s that exist in this group for
 	 * optimization purposes / static typing on cpp targets.
 	 */
-	var _sprites:Array<FlxSprite>;
+	@:deprecated("_sprites is deprecated, use group.members")
+	var _sprites(get, never):Array<FlxSprite>;
 
 	/**
 	 * @param   X         The initial X position of the group.
 	 * @param   Y         The initial Y position of the group.
 	 * @param   MaxSize   Maximum amount of members allowed.
 	 */
-	public function new(X:Float = 0, Y:Float = 0, MaxSize:Int = 0)
+	public function new(x = 0.0, y = 0.0, maxSize = 0)
 	{
-		super(X, Y);
-		group = new FlxTypedGroup<T>(MaxSize);
-		_sprites = cast group.members;
+		initGroup(maxSize);
+		super(x, y);
 	}
-
+	
+	function initGroup(maxSize:Int):Void
+	{
+		group = new FlxTypedGroup<T>(maxSize);
+	}
+	
 	/**
 	 * This method is used for initialization of variables of complex types.
 	 * Don't forget to call `super.initVars()` if you'll override this method,
@@ -114,8 +132,8 @@ class FlxTypedSpriteGroup<T:FlxSprite> extends FlxSprite
 		scale = FlxDestroyUtil.destroy(scale);
 		scrollFactor = FlxDestroyUtil.destroy(scrollFactor);
 
+		@:bypassAccessor
 		group = FlxDestroyUtil.destroy(group);
-		_sprites = null;
 
 		super.destroy();
 	}
@@ -146,7 +164,7 @@ class FlxTypedSpriteGroup<T:FlxSprite> extends FlxSprite
 	 */
 	override public function isOnScreen(?Camera:FlxCamera):Bool
 	{
-		for (sprite in _sprites)
+		for (sprite in group.members)
 		{
 			if (sprite != null && sprite.exists && sprite.visible && sprite.isOnScreen(Camera))
 				return true;
@@ -166,7 +184,7 @@ class FlxTypedSpriteGroup<T:FlxSprite> extends FlxSprite
 	override public function overlapsPoint(point:FlxPoint, InScreenSpace:Bool = false, ?Camera:FlxCamera):Bool
 	{
 		var result:Bool = false;
-		for (sprite in _sprites)
+		for (sprite in group.members)
 		{
 			if (sprite != null && sprite.exists && sprite.visible)
 			{
@@ -189,7 +207,7 @@ class FlxTypedSpriteGroup<T:FlxSprite> extends FlxSprite
 	override public function pixelsOverlapPoint(point:FlxPoint, Mask:Int = 0xFF, ?Camera:FlxCamera):Bool
 	{
 		var result:Bool = false;
-		for (sprite in _sprites)
+		for (sprite in group.members)
 		{
 			if (sprite != null && sprite.exists && sprite.visible)
 			{
@@ -203,6 +221,9 @@ class FlxTypedSpriteGroup<T:FlxSprite> extends FlxSprite
 	override public function update(elapsed:Float):Void
 	{
 		group.update(elapsed);
+
+		if (path != null && path.active)
+			path.update(elapsed);
 
 		if (moves)
 			updateMotion(elapsed);
@@ -236,7 +257,7 @@ class FlxTypedSpriteGroup<T:FlxSprite> extends FlxSprite
 		}
 
 		var spritePositions:Array<FlxPoint>;
-		for (sprite in _sprites)
+		for (sprite in group.members)
 		{
 			if (sprite != null)
 			{
@@ -284,9 +305,8 @@ class FlxTypedSpriteGroup<T:FlxSprite> extends FlxSprite
 	 *
 	 * @param	Sprite	The sprite or sprite group that is about to be added or inserted into the group.
 	 */
-	function preAdd(Sprite:T):Void
+	function preAdd(sprite:T):Void
 	{
-		var sprite:FlxSprite = cast Sprite;
 		sprite.x += x;
 		sprite.y += y;
 		sprite.alpha *= alpha;
@@ -330,30 +350,30 @@ class FlxTypedSpriteGroup<T:FlxSprite> extends FlxSprite
 	/**
 	 * Removes the specified sprite from the group.
 	 *
-	 * @param   Sprite   The `FlxSprite` you want to remove.
-	 * @param   Splice   Whether the object should be cut from the array entirely or not.
+	 * @param   sprite  The `FlxSprite` you want to remove.
+	 * @param   splice  Whether the object should be cut from the array entirely or not.
 	 * @return  The removed sprite.
 	 */
-	public function remove(Sprite:T, Splice:Bool = false):T
+	public function remove(sprite:T, splice = false):T
 	{
-		var sprite:FlxSprite = cast Sprite;
 		sprite.x -= x;
 		sprite.y -= y;
 		// alpha
 		sprite.cameras = null;
-		return group.remove(Sprite, Splice);
+		return group.remove(sprite, splice);
 	}
 
 	/**
 	 * Replaces an existing `FlxSprite` with a new one.
 	 *
-	 * @param   OldObject   The sprite you want to replace.
-	 * @param   NewObject   The new object you want to use instead.
+	 * @param   oldObject  The sprite you want to replace.
+	 * @param   newObject  The new object you want to use instead.
 	 * @return  The new sprite.
 	 */
-	public inline function replace(OldObject:T, NewObject:T):T
+	public inline function replace(oldObject:T, newObject:T):T
 	{
-		return group.replace(OldObject, NewObject);
+		preAdd(newObject);
+		return group.replace(oldObject, newObject);
 	}
 
 	/**
@@ -562,7 +582,7 @@ class FlxTypedSpriteGroup<T:FlxSprite> extends FlxSprite
 
 	override public function reset(X:Float, Y:Float):Void
 	{
-		for (sprite in _sprites)
+		for (sprite in group.members)
 		{
 			if (sprite != null)
 				sprite.reset(sprite.x + X - x, sprite.y + Y - y);
@@ -617,7 +637,7 @@ class FlxTypedSpriteGroup<T:FlxSprite> extends FlxSprite
 		if (_skipTransformChildren || group == null)
 			return;
 
-		for (sprite in _sprites)
+		for (sprite in group.members)
 		{
 			if (sprite != null)
 				Function(cast sprite, Value);
@@ -641,7 +661,7 @@ class FlxTypedSpriteGroup<T:FlxSprite> extends FlxSprite
 			return;
 
 		var lambda:T->V->Void;
-		for (sprite in _sprites)
+		for (sprite in group.members)
 		{
 			if ((sprite != null) && sprite.exists)
 			{
@@ -665,7 +685,7 @@ class FlxTypedSpriteGroup<T:FlxSprite> extends FlxSprite
 
 	override function set_cameras(Value:Array<FlxCamera>):Array<FlxCamera>
 	{
-		if (cameras != Value)
+		if (_cameras != Value)
 			transformChildren(camerasTransform, Value);
 		return super.set_cameras(Value);
 	}
@@ -734,7 +754,7 @@ class FlxTypedSpriteGroup<T:FlxSprite> extends FlxSprite
 		return alpha = Value;
 	}
 
-	override function set_facing(Value:Int):Int
+	override function set_facing(Value:FlxDirectionFlags):FlxDirectionFlags
 	{
 		if (exists && facing != Value)
 			transformChildren(facingTransform, Value);
@@ -834,7 +854,7 @@ class FlxTypedSpriteGroup<T:FlxSprite> extends FlxSprite
 	function findMinXHelper()
 	{
 		var value = Math.POSITIVE_INFINITY;
-		for (member in _sprites)
+		for (member in group.members)
 		{
 			if (member == null)
 				continue;
@@ -865,7 +885,7 @@ class FlxTypedSpriteGroup<T:FlxSprite> extends FlxSprite
 	function findMaxXHelper()
 	{
 		var value = Math.NEGATIVE_INFINITY;
-		for (member in _sprites)
+		for (member in group.members)
 		{
 			if (member == null)
 				continue;
@@ -906,13 +926,13 @@ class FlxTypedSpriteGroup<T:FlxSprite> extends FlxSprite
 	 */
 	public function findMinY()
 	{
-		return length == 0 ? x : findMinYHelper();
+		return length == 0 ? y : findMinYHelper();
 	}
 	
 	function findMinYHelper()
 	{
 		var value = Math.POSITIVE_INFINITY;
-		for (member in _sprites)
+		for (member in group.members)
 		{
 			if (member == null)
 				continue;
@@ -937,13 +957,13 @@ class FlxTypedSpriteGroup<T:FlxSprite> extends FlxSprite
 	 */
 	public function findMaxY()
 	{
-		return length == 0 ? x : findMaxYHelper();
+		return length == 0 ? y : findMaxYHelper();
 	}
 	
 	function findMaxYHelper()
 	{
 		var value = Math.NEGATIVE_INFINITY;
-		for (member in _sprites)
+		for (member in group.members)
 		{
 			if (member == null)
 				continue;
@@ -1004,7 +1024,7 @@ class FlxTypedSpriteGroup<T:FlxSprite> extends FlxSprite
 	inline function directAlphaTransform(Sprite:FlxSprite, Alpha:Float)
 		Sprite.alpha = Alpha; // direct set
 
-	inline function facingTransform(Sprite:FlxSprite, Facing:Int)
+	inline function facingTransform(Sprite:FlxSprite, Facing:FlxDirectionFlags)
 		Sprite.facing = Facing;
 
 	inline function flipXTransform(Sprite:FlxSprite, FlipX:Bool)
@@ -1053,7 +1073,7 @@ class FlxTypedSpriteGroup<T:FlxSprite> extends FlxSprite
 		Sprite.offset.copyFrom(Offset);
 
 	inline function originTransform(Sprite:FlxSprite, Origin:FlxPoint)
-		Sprite.origin.copyFrom(Origin);
+		Sprite.origin.set(x + origin.x - Sprite.x, y + origin.y - Sprite.y);
 
 	inline function scaleTransform(Sprite:FlxSprite, Scale:FlxPoint)
 		Sprite.scale.copyFrom(Scale);
@@ -1061,7 +1081,7 @@ class FlxTypedSpriteGroup<T:FlxSprite> extends FlxSprite
 	inline function scrollFactorTransform(Sprite:FlxSprite, ScrollFactor:FlxPoint)
 		Sprite.scrollFactor.copyFrom(ScrollFactor);
 
-	inline function clipRectTransform(Sprite:FlxSprite, ClipRect:FlxRect)
+	function clipRectTransform(Sprite:FlxSprite, ClipRect:FlxRect)
 	{
 		if (ClipRect == null)
 			Sprite.clipRect = null;
@@ -1146,7 +1166,17 @@ class FlxTypedSpriteGroup<T:FlxSprite> extends FlxSprite
 	{
 		return null;
 	}
-
+	
+	inline function get__sprites():Array<FlxSprite>
+	{
+		return cast group.members;
+	}
+	
+	function set_group(value:FlxTypedGroup<T>):FlxTypedGroup<T>
+	{
+		return this.group = value;
+	}
+	
 	/**
 	 * Internal function to update the current animation frame.
 	 *

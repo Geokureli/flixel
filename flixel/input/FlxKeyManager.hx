@@ -1,6 +1,6 @@
 package flixel.input;
 
-import flash.events.KeyboardEvent;
+import openfl.events.KeyboardEvent;
 import flixel.FlxG;
 import flixel.input.FlxInput.FlxInputState;
 import flixel.input.keyboard.FlxKey;
@@ -228,6 +228,9 @@ class FlxKeyManager<Key:Int, KeyList:FlxBaseKeyList> implements IFlxInputManager
 	 */
 	public function destroy():Void
 	{
+		FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
+		FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyUp);
+		
 		_keyListArray = null;
 		_keyListMap = null;
 	}

@@ -1,7 +1,7 @@
 package flixel.input.touch;
 
 #if FLX_TOUCH
-import flash.geom.Point;
+import openfl.geom.Point;
 import flixel.FlxG;
 import flixel.input.FlxInput;
 import flixel.input.FlxSwipe;
@@ -81,13 +81,13 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 
 		if (justPressed)
 		{
-			justPressedPosition.set(screenX, screenY);
+			justPressedPosition.set(viewX, viewY);
 			justPressedTimeInTicks = FlxG.game.ticks;
 		}
 		#if FLX_POINTER_INPUT
 		else if (justReleased)
 		{
-			FlxG.swipes.push(new FlxSwipe(touchPointID, justPressedPosition, getScreenPosition(), justPressedTimeInTicks));
+			FlxG.swipes.push(new FlxSwipe(touchPointID, justPressedPosition.copyTo(), getViewPosition(), justPressedTimeInTicks));
 		}
 		#end
 	}
@@ -100,7 +100,10 @@ class FlxTouch extends FlxPointer implements IFlxDestroyable implements IFlxInpu
 	 */
 	function setXY(x:Int, y:Int):Void
 	{
-		setWindowPositionUnsafe(x, y);
+		flashPoint.setTo(x, y);
+		flashPoint = FlxG.game.globalToLocal(flashPoint);
+
+		setRawPositionUnsafe(flashPoint.x, flashPoint.y);
 	}
 
 	inline function get_touchPointID():Int

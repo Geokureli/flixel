@@ -1,18 +1,17 @@
 package flixel.graphics.tile;
 
-#if FLX_DRAW_QUADS
 import flixel.FlxCamera;
 import flixel.graphics.frames.FlxFrame;
 import flixel.graphics.tile.FlxDrawBaseItem.FlxDrawItemType;
-import flixel.system.FlxAssets.FlxShader;
 import flixel.math.FlxMatrix;
-import openfl.geom.ColorTransform;
-import openfl.display.ShaderParameter;
+import flixel.system.FlxAssets.FlxShader;
 import openfl.Vector;
+import openfl.display.ShaderParameter;
+import openfl.geom.ColorTransform;
 
 class FlxDrawQuadsItem extends FlxDrawBaseItem<FlxDrawQuadsItem>
 {
-	static inline var VERTICES_PER_QUAD = #if (openfl >= "8.5.0") 4 #else 6 #end;
+	static inline var VERTICES_PER_QUAD = 4;
 
 	public var shader:FlxShader;
 
@@ -68,8 +67,9 @@ class FlxDrawQuadsItem extends FlxDrawBaseItem<FlxDrawQuadsItem>
 		transforms.push(matrix.tx);
 		transforms.push(matrix.ty);
 
+		var alphaMultiplier = transform != null ? transform.alphaMultiplier : 1.0;
 		for (i in 0...VERTICES_PER_QUAD)
-			alphas.push(transform != null ? transform.alphaMultiplier : 1.0);
+			alphas.push(alphaMultiplier);
 
 		if (colored || hasColorOffsets)
 		{
@@ -114,8 +114,12 @@ class FlxDrawQuadsItem extends FlxDrawBaseItem<FlxDrawQuadsItem>
 	{
 		if (rects.length == 0)
 			return;
-
-		var shader = shader != null ? shader : graphics.shader;
+		
+		// TODO: catch this error when the dev actually messes up, not in the draw phase
+		if (shader == null && graphics.isDestroyed)
+			throw 'Attempted to render an invalid FlxDrawItem, did you destroy a cached sprite?';
+		
+		final shader = shader != null ? shader : graphics.shader;
 		shader.bitmap.input = graphics.bitmap;
 		shader.bitmap.filter = (camera.antialiasing || antialiasing) ? LINEAR : NEAREST;
 		shader.alpha.value = alphas;
@@ -129,9 +133,7 @@ class FlxDrawQuadsItem extends FlxDrawBaseItem<FlxDrawQuadsItem>
 		setParameterValue(shader.hasTransform, true);
 		setParameterValue(shader.hasColorTransform, colored || hasColorOffsets);
 
-		#if (openfl > "8.7.0")
 		camera.canvas.graphics.overrideBlendMode(blend);
-		#end
 		camera.canvas.graphics.beginShaderFill(shader);
 		camera.canvas.graphics.drawQuads(rects, null, transforms);
 		super.render(camera);
@@ -145,4 +147,3 @@ class FlxDrawQuadsItem extends FlxDrawBaseItem<FlxDrawQuadsItem>
 	}
 	#end
 }
-#end

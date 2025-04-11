@@ -39,6 +39,11 @@ abstract FlxTypedSignal<T>(IFlxSignal<T>)
 		this.removeAll();
 	}
 
+	public inline function destroy():Void
+	{
+		this.destroy();
+	}
+
 	inline function get_dispatch():T
 	{
 		return this.dispatch;
@@ -128,14 +133,19 @@ private class FlxBaseSignal<T> implements IFlxSignal<T>
 			var handler = getHandler(listener);
 			if (handler != null)
 			{
-				if (processingListeners)
-					pendingRemove.push(handler);
-				else
-				{
-					handlers.remove(handler);
-					handler.destroy();
-				}
+				removeHandler(handler);
 			}
+		}
+	}
+	
+	inline function removeHandler(handler:FlxSignalHandler<T>):Void
+	{
+		if (processingListeners)
+			pendingRemove.push(handler)
+		else
+		{
+			handlers.remove(handler);
+			handler.destroy();
 		}
 	}
 
@@ -270,6 +280,7 @@ interface IFlxSignal<T> extends IFlxDestroyable
 	function addOnce(listener:T):Void;
 	function remove(listener:T):Void;
 	function removeAll():Void;
+	function destroy():Void;
 	function has(listener:T):Bool;
 }
 #end
@@ -286,14 +297,14 @@ private class Macro
 				handler.listener($a{exprs});
 
 				if (handler.dispatchOnce)
-					remove(handler.listener);
+					removeHandler(handler);
 			}
 
 			processingListeners = false;
 
 			for (handler in pendingRemove)
 			{
-				remove(handler.listener);
+				removeHandler(handler);
 			}
 			if (pendingRemove.length > 0)
 				pendingRemove = [];

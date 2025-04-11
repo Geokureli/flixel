@@ -1,7 +1,7 @@
 package flixel.graphics.frames;
 
-import flash.display.BitmapData;
-import flash.geom.Point;
+import openfl.display.BitmapData;
+import openfl.geom.Point;
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxFramesCollection.FlxFrameCollectionType;
 import flixel.math.FlxPoint;
@@ -208,7 +208,7 @@ class FlxTileFrames extends FlxFramesCollection
 			tileFrames.frames.push(frame);
 
 			if (frame.name != null)
-				tileFrames.framesHash.set(frame.name, frame);
+				tileFrames.framesByName.set(frame.name, frame);
 		}
 
 		return tileFrames;
@@ -237,9 +237,9 @@ class FlxTileFrames extends FlxFramesCollection
 		{
 			var name:String = framesToAdd[0].name;
 			var postIndex:Int = name.indexOf(".", Prefix.length);
-			var postFix:String = name.substring(postIndex == -1 ? name.length : postIndex, name.length);
+			var suffix:String = name.substring(postIndex == -1 ? name.length : postIndex, name.length);
 
-			FlxFrame.sort(framesToAdd, Prefix.length, postFix.length);
+			FlxFrame.sortFrames(framesToAdd, Prefix, suffix);
 			return FlxTileFrames.fromFrames(framesToAdd);
 		}
 
@@ -514,7 +514,7 @@ class FlxTileFrames extends FlxFramesCollection
 
 	override public function addBorder(border:FlxPoint):FlxTileFrames
 	{
-		var resultBorder:FlxPoint = FlxPoint.get().addPoint(this.border).addPoint(border);
+		var resultBorder:FlxPoint = FlxPoint.get().add(this.border).add(border);
 		var resultSize:FlxPoint = FlxPoint.get().copyFrom(tileSize).subtract(2 * border.x, 2 * border.y);
 		var tileFrames:FlxTileFrames = FlxTileFrames.findFrame(parent, resultSize, region, atlasFrame, tileSpacing, resultBorder);
 		if (tileFrames != null)

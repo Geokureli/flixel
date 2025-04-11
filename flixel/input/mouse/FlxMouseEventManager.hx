@@ -1,12 +1,11 @@
 package flixel.input.mouse;
 
 import haxe.ds.ArraySort;
-import flash.errors.Error;
+import openfl.errors.Error;
 import flixel.FlxBasic;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxObject;
-import flixel.FlxSprite;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.input.mouse.FlxMouseButton.FlxMouseButtonID;
 import flixel.math.FlxPoint;
@@ -14,31 +13,14 @@ import flixel.util.FlxDestroyUtil;
 
 /**
  * Provides mouse event detection for `FlxObject` and `FlxSprite` (pixel-perfect for those).
- * To use it, initialize the manager and register objects / sprites.
- *
- * ```haxe
- * FlxG.plugins.add(new FlxMouseEventManager());
- * var object = new FlxObject();
- * FlxMouseEventManager.add(
- *	 object, onMouseDown, onMouseUp, onMouseOver, onMouseOut);
- * ```
- *
- * Or simply add a new object and this plugin will initialize itself:
- *
- * ```haxe
- * FlxMouseEventManager.add(
- *	 object, onMouseDown, onMouseUp, onMouseOver, onMouseOut);
- * ```
- *
- * Also implement the callbacks with the object's type as parameters:
- *
- * ```haxe
- * function onMouseDown(object:FlxObject) {}
- * function onMouseUp(object:FlxObject) {}
- * function onMouseOver(object:FlxObject) {}
- * function onMouseOut(object:FlxObject) {}
- * ```
- *
+ * Normally you would use `FlxMouseEvent` static properties for this.
+ * 
+ * You can make a new `FlxMouseEventManager` instance for private usage, 
+ * but you should know what you are doing.
+ * 
+ * @see [FlxMouseEvent](https://api.haxeflixel.com/flixel/input/mouse/FlxMouseEvent.html)
+ * @see [FlxMouseEvent Demo](https://haxeflixel.com/demos/FlxMouseEvent/)
+ * 
  * @author TiagoLr (~~~ ProG4mr ~~~)
  */
 class FlxMouseEventManager extends FlxBasic
@@ -289,7 +271,7 @@ class FlxMouseEventManager extends FlxBasic
 	 *                          Must have Object as argument - e.g. `onMouseDown(object:FlxObject)`.
 	 * @param   onMouseUp       Callback when mouse is released over this object.
 	 *                          Must have Object as argument - e.g. `onMouseDown(object:FlxObject)`.
-	 * @param   onMouseOver     Callback when mouse is this object.
+	 * @param   onMouseOver     Callback when mouse is over this object.
 	 *                          Must have Object as argument - e.g. `onMouseDown(object:FlxObject)`.
 	 * @param   onMouseOut      Callback when mouse moves out of this object.
 	 *                          Must have Object as argument - e.g. `onMouseDown(object:FlxObject)`.
@@ -650,10 +632,10 @@ class FlxMouseEventManager extends FlxBasic
 
 	function checkOverlap<T:FlxObject>(event:FlxMouseEvent<T>):Bool
 	{
-		for (camera in event.object.cameras)
+		for (camera in event.object.getCameras())
 		{
 			#if FLX_MOUSE
-			_point = FlxG.mouse.getPositionInCameraView(camera, _point);
+			_point = FlxG.mouse.getViewPosition(camera, _point);
 			if (camera.containsPoint(_point))
 			{
 				_point = FlxG.mouse.getWorldPosition(camera, _point);
@@ -668,7 +650,7 @@ class FlxMouseEventManager extends FlxBasic
 			#if FLX_TOUCH
 			for (touch in FlxG.touches.list)
 			{
-				_point = touch.getPositionInCameraView(camera, _point);
+				_point = touch.getViewPosition(camera, _point);
 				if (camera.containsPoint(_point))
 				{
 					_point = touch.getWorldPosition(camera, _point);

@@ -1,13 +1,11 @@
 package flixel.system.debug.interaction.tools;
 
-import flash.display.BitmapData;
-import flash.ui.Keyboard;
+import openfl.display.BitmapData;
+import openfl.ui.Keyboard;
 import flixel.FlxObject;
 import flixel.math.FlxPoint;
+import flixel.system.debug.Icon;
 import flixel.system.debug.interaction.Interaction;
-
-@:bitmap("assets/images/debugger/buttons/mover.png")
-private class GraphicMoverTool extends BitmapData {}
 
 /**
  * A tool to move selected items.
@@ -25,17 +23,18 @@ class Mover extends Tool
 		_lastCursorPosition = new FlxPoint(brain.flixelPointer.x, brain.flixelPointer.x);
 
 		_name = "Mover";
-		_shortcut = "Shift";
-		setButton(GraphicMoverTool);
-		setCursor(new GraphicMoverTool(0, 0));
+		_shortcut = brain.macKeyboard ? "⌘" : "Ctrl";
+		setButton(Icon.mover);
+		setCursor(Icon.mover, -5, -5);
 
 		return this;
 	}
 
 	override public function update():Void
 	{
+		final key = _brain.macKeyboard ? Keyboard.COMMAND : Keyboard.CONTROL;
 		// Is the tool active or its hotkey pressed?
-		if (!isActive() && !_brain.keyPressed(Keyboard.SHIFT))
+		if (!isActive() && !_brain.keyPressed(key) && !_dragging)
 			return;
 
 		if (_brain.pointerPressed && !_dragging)
