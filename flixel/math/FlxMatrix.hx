@@ -92,6 +92,22 @@ class FlxMatrix extends Matrix
 	{
 		return px * b + py * d + ty;
 	}
+	
+	/**
+	 * Returns a new point with the result of applying the geometric transformation represented by
+	 * the Matrix object to the specified point.
+	 * @param   pos     The point for which you want to get the result of the Matrix transformation
+	 * @param   result  Optional point to store the result, if `null`, a new one is created
+	 */
+	public function transform(pos:FlxPoint, ?result:FlxPoint)
+	{
+		if(result == null)
+			result = FlxPoint.get();
+		
+		result.set(transformX(pos.x, pos.y), transformY(pos.x, pos.y));
+		pos.putWeak();
+		return result;
+	}
 
 	#if (nme && !flash)
 	public function copyFrom(sourceMatrix:Matrix):Void

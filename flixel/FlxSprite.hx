@@ -20,6 +20,7 @@ import flixel.util.FlxDirectionFlags;
 import openfl.display.BitmapData;
 import openfl.display.BlendMode;
 import openfl.geom.ColorTransform;
+import openfl.geom.Matrix;
 import openfl.geom.Point;
 import openfl.geom.Rectangle;
 
@@ -873,17 +874,21 @@ class FlxSprite extends FlxObject
 		drawFrameComplex(_frame, camera);
 	}
 	
-	public function prepareDrawMatrix(matrix:FlxMatrix, ?camera:FlxCamera)
+	public function prepareDrawMatrix(?matrix:FlxMatrix, ?camera:FlxCamera)
 	{
 		if (camera == null)
 			camera = this.getDefaultCamera();
 		
-		prepareFrameDrawMatrix(matrix, _frame, camera);
+		return prepareFrameDrawMatrix(matrix, _frame, camera);
 	}
 	
 	function prepareFrameDrawMatrix(matrix:FlxMatrix, frame:FlxFrame, camera:FlxCamera)
 	{
-		matrix.identity();
+		if (matrix == null)
+			matrix = new FlxMatrix();
+		else
+			matrix.identity();
+		
 		frame.prepareMatrix(matrix, FlxFrameAngle.ANGLE_0, checkFlipX(), checkFlipY());
 		matrix.translate(-origin.x, -origin.y);
 		matrix.scale(scale.x, scale.y);
@@ -905,6 +910,7 @@ class FlxSprite extends FlxObject
 			matrix.tx = Math.floor(matrix.tx);
 			matrix.ty = Math.floor(matrix.ty);
 		}
+		return matrix;
 	}
 	
 	function drawFrameComplex(frame:FlxFrame, camera:FlxCamera):Void
@@ -1205,19 +1211,9 @@ class FlxSprite extends FlxObject
 	 */
 	public function transformScreenToPixels(screenPoint:FlxPoint, ?camera:FlxCamera, ?result:FlxPoint):FlxPoint
 	{
-		result = getScreenPosition(result, camera);
-		
-		result.subtract(screenPoint.x, screenPoint.y);
-		result.negate();
-		result.add(offset);
-		result.subtract(origin);
-		result.scale(1 / scale.x, 1 / scale.y);
-		result.degrees -= angle;
-		result.add(origin);
-		
-		screenPoint.putWeak();
-		
-		return result;
+		final matrix = prepareDrawMatrix(camera);
+		matrix.invert();
+		return matrix.transform(screenPoint, result);// puts weak
 	}
 
 	/**
