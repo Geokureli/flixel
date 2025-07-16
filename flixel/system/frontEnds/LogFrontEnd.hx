@@ -134,11 +134,23 @@ class LogFrontEnd
  */
 class LogFrontEndStyles
 {
+	/** The lowest severity message style. By default, doesn't open the console or beep */
 	public var NORMAL:LogStyle = new LogStyle();
-	public var WARNING:LogStyle = new LogStyle("[WARNING] ", "D9F85C", 12, false, false, false, "flixel/sounds/beep", true);
-	public var ERROR:LogStyle = new LogStyle("[ERROR] ", "FF8888", 12, false, false, false, "flixel/sounds/beep", true);
+	
+	/** A low severity message style. By default, doesn't open the console or beep */
 	public var NOTICE:LogStyle = new LogStyle("[NOTICE] ", "5CF878", 12, false);
+	
+	/** Logged when something unexpected but safe happens. By default, opens the console and beeps */
+	public var WARNING:LogStyle = new LogStyle("[WARNING] ", "D9F85C", 12, false, false, false, "flixel/sounds/beep", true);
+	
+	/** Logged when something unsafe happens. By default, opens the console and beeps */
+	public var ERROR:LogStyle = new LogStyle("[ERROR] ", "FF8888", 12, false, false, false, "flixel/sounds/beep", true);
+	
+	/** Used internally by Flixel's console debugging tool */
 	public var CONSOLE:LogStyle = new LogStyle("> ", "5A96FA", 12, false);
 	
-	public function new() {}
+	public function new()
+	{
+		// TODO: check FLX_LOG_SEVERITY_THROW, FLX_LOG_SEVERITY_BEEP and FLX_LOG_SEVERITY_OPEN
+	}
 }
