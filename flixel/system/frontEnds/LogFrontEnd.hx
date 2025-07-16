@@ -1,8 +1,8 @@
 package flixel.system.frontEnds;
 
 import flixel.FlxG;
-import flixel.system.debug.log.LogStyle;
 import flixel.system.FlxAssets;
+import flixel.system.debug.log.LogStyle;
 import haxe.PosInfos;
 
 /**
@@ -15,26 +15,28 @@ class LogFrontEnd
 	 */
 	public var redirectTraces(default, set):Bool = false;
 
+	public final styles = new LogFrontEndStyles();
+	
 	var _standardTraceFunction:(Dynamic, ?PosInfos)->Void;
 	
 	public inline function add(data:Dynamic, ?pos:PosInfos):Void
 	{
-		advanced(data, LogStyle.NORMAL, false, pos);
+		advanced(data, styles.NORMAL, false, pos);
 	}
 	
 	public inline function warn(data:Dynamic, ?pos:PosInfos):Void
 	{
-		advanced(data, LogStyle.WARNING, true, pos);
+		advanced(data, styles.WARNING, true, pos);
 	}
 	
 	public inline function error(data:Dynamic, ?pos:PosInfos):Void
 	{
-		advanced(data, LogStyle.ERROR, true, pos);
+		advanced(data, styles.ERROR, true, pos);
 	}
 	
 	public inline function notice(data:Dynamic, ?pos:PosInfos):Void
 	{
-		advanced(data, LogStyle.NOTICE, false, pos);
+		advanced(data, styles.NOTICE, false, pos);
 	}
 	
 	/**
@@ -48,7 +50,7 @@ class LogFrontEnd
 	public function advanced(data:Any, ?style:LogStyle, fireOnce = false, ?pos:PosInfos):Void
 	{
 		if (style == null)
-			style = LogStyle.NORMAL;
+			style = styles.NORMAL;
 		
 		final arrayData = (!(data is Array) ? [data] : cast data);
 		
@@ -123,6 +125,20 @@ class LogFrontEnd
 			}
 		}
 
-		advanced(paramArray, LogStyle.NORMAL);
+		advanced(paramArray, FlxG.log.styles.NORMAL);
 	}
+}
+
+/**
+ * Helper for LogStyle static 
+ */
+class LogFrontEndStyles
+{
+	public var NORMAL:LogStyle = new LogStyle();
+	public var WARNING:LogStyle = new LogStyle("[WARNING] ", "D9F85C", 12, false, false, false, "flixel/sounds/beep", true);
+	public var ERROR:LogStyle = new LogStyle("[ERROR] ", "FF8888", 12, false, false, false, "flixel/sounds/beep", true);
+	public var NOTICE:LogStyle = new LogStyle("[NOTICE] ", "5CF878", 12, false);
+	public var CONSOLE:LogStyle = new LogStyle("> ", "5A96FA", 12, false);
+	
+	public function new() {}
 }

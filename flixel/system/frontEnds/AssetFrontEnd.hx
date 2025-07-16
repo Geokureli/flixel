@@ -3,17 +3,17 @@ package flixel.system.frontEnds;
 import flixel.FlxG;
 import flixel.system.FlxAssets;
 import flixel.system.debug.log.LogStyle;
+import haxe.Json;
 import haxe.io.Bytes;
 import haxe.io.Path;
-import haxe.Json;
 import haxe.xml.Access;
 import openfl.display.BitmapData;
 import openfl.media.Sound;
-import openfl.utils.Assets;
-import openfl.utils.AssetType;
-import openfl.utils.AssetCache;
-import openfl.utils.Future;
 import openfl.text.Font;
+import openfl.utils.AssetCache;
+import openfl.utils.AssetType;
+import openfl.utils.Assets;
+import openfl.utils.Future;
 
 using StringTools;
 
@@ -169,14 +169,14 @@ class AssetFrontEnd
 	 * @param   id        The id of the asset, usually a path
 	 * @param   type      The type of asset to look for, determines the type
 	 * @param   useCache  Whether to allow use of the asset cache (if one exists)
-	 * @param   logStyle  How to log, if the asset is not found. Uses `LogStyle.ERROR` by default
+	 * @param   logStyle  How to log, if the asset is not found. Uses `FlxG.log.styles.ERROR` by default
 	 */
 	public function getAsset(id:String, type:FlxAssetType, useCache = true, ?logStyle:LogStyle):Null<Any>
 	{
 		inline function log(message:String)
 		{
 			if (logStyle == null)
-				logStyle = LogStyle.ERROR;
+				logStyle = FlxG.log.styles.ERROR;
 			FlxG.log.advanced(message, logStyle);
 		}
 		

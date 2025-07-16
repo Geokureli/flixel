@@ -11,11 +11,38 @@ using flixel.util.FlxStringUtil;
  */
 class LogStyle
 {
-	public static var NORMAL:LogStyle = new LogStyle();
-	public static var WARNING:LogStyle = new LogStyle("[WARNING] ", "D9F85C", 12, false, false, false, "flixel/sounds/beep", true);
-	public static var ERROR:LogStyle = new LogStyle("[ERROR] ", "FF8888", 12, false, false, false, "flixel/sounds/beep", true);
-	public static var NOTICE:LogStyle = new LogStyle("[NOTICE] ", "5CF878", 12, false);
-	public static var CONSOLE:LogStyle = new LogStyle("> ", "5A96FA", 12, false);
+	// @formatter:off
+	@:deprecated('LogStyle.NORMAL is deprecated, use FlxG.log.styles.NORMAL, instead')
+	@:noCompletion
+	public static var NORMAL(get, set):LogStyle;
+	@:deprecated('LogStyle.WARNING is deprecated, use FlxG.log.styles.WARNING, instead')
+	@:noCompletion
+	public static var WARNING(get, set):LogStyle;
+	@:deprecated('LogStyle.ERROR is deprecated, use FlxG.log.styles.ERROR, instead')
+	@:noCompletion
+	public static var ERROR(get, set):LogStyle;
+	@:deprecated('LogStyle.NOTICE is deprecated, use FlxG.log.styles.NOTICE, instead')
+	@:noCompletion
+	public static var NOTICE(get, set):LogStyle;
+	@:deprecated('LogStyle.CONSOLE is deprecated, use FlxG.log.styles.CONSOLE, instead')
+	@:noCompletion
+	public static var CONSOLE(get, set):LogStyle;
+	
+	@:noCompletion static inline function get_NORMAL() return FlxG.log.styles.NORMAL;
+	@:noCompletion static inline function set_NORMAL(value:LogStyle) return FlxG.log.styles.NORMAL = value;
+	
+	@:noCompletion static inline function get_WARNING() return FlxG.log.styles.WARNING;
+	@:noCompletion static inline function set_WARNING(value:LogStyle) return FlxG.log.styles.WARNING = value;
+	
+	@:noCompletion static inline function get_ERROR() return FlxG.log.styles.ERROR;
+	@:noCompletion static inline function set_ERROR(value:LogStyle) return FlxG.log.styles.ERROR = value;
+	
+	@:noCompletion static inline function get_NOTICE() return FlxG.log.styles.NOTICE;
+	@:noCompletion static inline function set_NOTICE(value:LogStyle) return FlxG.log.styles.NOTICE = value;
+	
+	@:noCompletion static inline function get_CONSOLE()return FlxG.log.styles.CONSOLE;
+	@:noCompletion static inline function set_CONSOLE(value:LogStyle) return FlxG.log.styles.CONSOLE = value;
+	// @formatter:on
 
 	/**
 	 * A prefix which is always attached to the start of the logged data
