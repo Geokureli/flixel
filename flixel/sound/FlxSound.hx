@@ -478,17 +478,17 @@ class FlxSound extends FlxBasic
 	{
 		if (!exists)
 			return this;
-			
+		
 		if (ForceRestart)
 			cleanup(false, true);
 		else if (playing) // Already playing sound
 			return this;
-			
+		
 		if (_paused)
 			resume();
 		else
 			startSound(StartTime);
-			
+		
 		endTime = EndTime;
 		return this;
 	}
@@ -520,7 +520,7 @@ class FlxSound extends FlxBasic
 	/**
 	 * Call this function to stop this sound.
 	 */
-	public inline function stop():FlxSound
+	public function stop():FlxSound
 	{
 		cleanup(autoDestroy, true);
 		return this;
@@ -532,7 +532,7 @@ class FlxSound extends FlxBasic
 	 * @param	Duration	The amount of time the fade-out operation should take.
 	 * @param	To			The volume to tween to, 0 by default.
 	 */
-	public inline function fadeOut(Duration:Float = 1, ?To:Float = 0, ?onComplete:FlxTween->Void):FlxSound
+	public function fadeOut(Duration:Float = 1, ?To:Float = 0, ?onComplete:FlxTween->Void):FlxSound
 	{
 		if (fadeTween != null)
 			fadeTween.cancel();
@@ -548,7 +548,7 @@ class FlxSound extends FlxBasic
 	 * @param	From		The volume to tween from, 0 by default.
 	 * @param	To			The volume to tween to, 1 by default.
 	 */
-	public inline function fadeIn(Duration:Float = 1, From:Float = 0, To:Float = 1, ?onComplete:FlxTween->Void):FlxSound
+	public function fadeIn(Duration:Float = 1, From:Float = 0, To:Float = 1, ?onComplete:FlxTween->Void):FlxSound
 	{
 		if (!playing)
 			play();
@@ -570,7 +570,7 @@ class FlxSound extends FlxBasic
 	 *
 	 * @return	The adjusted volume of the sound.
 	 */
-	public inline function getActualVolume():Float
+	public function getActualVolume():Float
 	{
 		return _volume * _volumeAdjust;
 	}
@@ -582,7 +582,7 @@ class FlxSound extends FlxBasic
 	 * @param        X        The new x position
 	 * @param        Y        The new y position
 	 */
-	public inline function setPosition(X:Float = 0, Y:Float = 0):Void
+	public function setPosition(X:Float = 0, Y:Float = 0):Void
 	{
 		x = X;
 		y = Y;
@@ -734,12 +734,12 @@ class FlxSound extends FlxBasic
 		return value;
 	}
 	
-	inline function get_playing():Bool
+	function get_playing():Bool
 	{
 		return _channel != null;
 	}
 	
-	inline function get_volume():Float
+	function get_volume():Float
 	{
 		return _volume;
 	}
@@ -752,7 +752,7 @@ class FlxSound extends FlxBasic
 	}
 	
 	#if FLX_PITCH
-	inline function get_pitch():Float
+	function get_pitch():Float
 	{
 		return _pitch;
 	}
@@ -776,19 +776,19 @@ class FlxSound extends FlxBasic
 	}
 	#end
 	
-	inline function get_pan():Float
+	function get_pan():Float
 	{
 		return _transform.pan;
 	}
 	
-	inline function set_pan(pan:Float):Float
+	function set_pan(pan:Float):Float
 	{
 		_transform.pan = pan;
 		updateTransform();
 		return pan;
 	}
 	
-	inline function get_time():Float
+	function get_time():Float
 	{
 		return _time;
 	}
@@ -803,7 +803,8 @@ class FlxSound extends FlxBasic
 		return _time = time;
 	}
 	
-	inline function get_length():Float
+	
+	function get_length():Float
 	{
 		return _length;
 	}
