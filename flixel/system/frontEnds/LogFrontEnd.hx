@@ -130,27 +130,78 @@ class LogFrontEnd
 }
 
 /**
- * Helper for LogStyle static 
+ * Allows global access to the various log styles. Styles are `NORMAL`, `NOTICE`, `WARNING`,
+ * `ERROR` and `CONSOLE`. Each style's behavior can be changed at runtime. There are also
+ * compiler flags: `FLX_LOG_LEVEL_THROW`, `FLX_LOG_LEVEL_OPEN` and `FLX_LOG_LEVEL_BEEP` to
+ * determine which levels will throw errors, open the console and beep, set these flags to:
+ * `error`, `warning`, `notice`, `normal` or `none` so that the given level **and all higher
+ * priorities** will be set.
  */
 class LogFrontEndStyles
 {
+	static inline var DEFAULT_BEEP_SOUND = "flixel/sounds/beep";
+	
 	/** The lowest severity message style. By default, doesn't open the console or beep */
 	public var NORMAL:LogStyle = new LogStyle();
 	
 	/** A low severity message style. By default, doesn't open the console or beep */
-	public var NOTICE:LogStyle = new LogStyle("[NOTICE] ", "5CF878", 12, false);
+	public var NOTICE:LogStyle = new LogStyle("[NOTICE] ", "5CF878");
 	
 	/** Logged when something unexpected but safe happens. By default, opens the console and beeps */
-	public var WARNING:LogStyle = new LogStyle("[WARNING] ", "D9F85C", 12, false, false, false, "flixel/sounds/beep", true);
+	public var WARNING:LogStyle = new LogStyle("[WARNING] ", "D9F85C");
 	
 	/** Logged when something unsafe happens. By default, opens the console and beeps */
-	public var ERROR:LogStyle = new LogStyle("[ERROR] ", "FF8888", 12, false, false, false, "flixel/sounds/beep", true);
+	public var ERROR:LogStyle = new LogStyle("[ERROR] ", "FF8888");
 	
 	/** Used internally by Flixel's console debugging tool */
-	public var CONSOLE:LogStyle = new LogStyle("> ", "5A96FA", 12, false);
+	public var CONSOLE:LogStyle = new LogStyle("> ", "5A96FA");
 	
 	public function new()
 	{
-		// TODO: check FLX_LOG_SEVERITY_THROW, FLX_LOG_SEVERITY_BEEP and FLX_LOG_SEVERITY_OPEN
+		final styles = [this.ERROR, this.WARNING, this.NOTICE, this.NORMAL];
+		final levels = [Level.ERROR, Level.WARNING, Level.NOTICE, Level.NORMAL, Level.NONE];
+		
+		inline function getIndex(level:String)
+		{
+			return levels.indexOf(level.toLowerCase());
+		}
+		
+		inline function assertIndex(level:String)
+		{
+			final levelValid = level.toLowerCase();
+			if (!levels.contains(levelValid))
+				throw 'Invalid level: $level';
+			
+			return levels.indexOf(levelValid.toLowerCase());
+		}
+		
+		inline function forEachLevel(level:Int, func:(LogStyle)->Void)
+		{
+			for (i in level...styles.length)
+				func(styles[i]);
+		}
+		
+		inline function forEachStyleBackup(flag:String, backup:Level, func:(LogStyle)->Void)
+		{
+			final index = getIndex(flag);
+			forEachLevel(index < 0 ? assertIndex(backup) : index, func);
+		}
+		
+		final levelThrow = '${haxe.macro.Compiler.getDefine("FLX_LOG_LEVEL_THROW")}';
+		final levelOpen = '${haxe.macro.Compiler.getDefine("FLX_LOG_LEVEL_OPEN")}';
+		final levelBeep = '${haxe.macro.Compiler.getDefine("FLX_LOG_LEVEL_BEEP")}';
+		
+		forEachStyleBackup(levelThrow, Level.ERROR, (style)->style.throwException = true);
+		forEachStyleBackup(levelOpen, Level.WARNING, (style)->style.openConsole = true);
+		forEachStyleBackup(levelBeep, Level.WARNING, (style)->style.errorSound = DEFAULT_BEEP_SOUND);
 	}
+}
+
+private enum abstract Level(String) to String from String
+{
+	var ERROR = "error";
+	var WARNING = "warning";
+	var NORMAL = "normal";
+	var NOTICE = "info";
+	var NONE = "none";
 }

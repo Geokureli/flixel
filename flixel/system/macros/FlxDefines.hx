@@ -66,6 +66,24 @@ private enum UserDefines
 	 * Used to make the debug windows bigger
 	 */
 	FLX_DEBUGGER_SCALE;
+	
+	/**
+	 * Whether to throw an error, and for which severities, possible values are "error",
+	 * "warning", "notice", "normal" or "none". If not defined, "error" is used in debug, and "none", otherwise
+	 */
+	FLX_LOG_LEVEL_THROW;
+	
+	/**
+	 * Whether to open the log console, and for which severities, possible values are "error",
+	 * "warning", "notice", "normal" or "none". If not defined, "warning" is used
+	 */
+	FLX_LOG_LEVEL_OPEN;
+	
+	/**
+	 * Whether to beep, and for which severities, possible values are "error",
+	 * "warning", "notice", "normal" or "none". If not defined, "warning" is used
+	 */
+	FLX_LOG_LEVEL_BEEP;
 }
 
 /**
