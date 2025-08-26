@@ -1,8 +1,8 @@
 package flixel.util;
 
-import flixel.tweens.FlxEase;
 import flixel.math.FlxMath;
 import flixel.system.macros.FlxMacroUtil;
+import flixel.tweens.FlxEase;
 
 /**
  * Class representing a color, based on Int. Provides a variety of methods for creating and converting colors.
@@ -86,96 +86,103 @@ abstract FlxColor(Int) from Int from UInt to Int to UInt
 	 * RGB -> Luma calculation from https://www.w3.org/TR/AERT/#color-contrast
 	 */
 	public var luminance(get, never):Float;
+	
+	public var okLab(get, never):FlxOKLabColor;
 
 	static var COLOR_REGEX = ~/^(0x|#)(([A-F0-9]{2}){3,4})$/i;
-
+	
 	/**
 	 * Create a color from the least significant four bytes of an Int
 	 *
-	 * @param	Value And Int with bytes in the format 0xAARRGGBB
-	 * @return	The color as a FlxColor
+	 * @param   value  An Int with bytes in the format 0xAARRGGBB
+	 * @return  The color as a FlxColor
 	 */
-	public static inline function fromInt(Value:Int):FlxColor
+	public static inline function fromInt(value:Int):FlxOKLabColor
 	{
-		return new FlxColor(Value);
+		return new FlxColor(value);
 	}
-
+	
 	/**
 	 * Generate a color from integer RGB values (0 to 255)
 	 *
-	 * @param Red	The red value of the color from 0 to 255
-	 * @param Green	The green value of the color from 0 to 255
-	 * @param Blue	The green value of the color from 0 to 255
-	 * @param Alpha	How opaque the color should be, from 0 to 255
-	 * @return The color as a FlxColor
+	 * @param   red    The red value of the color from 0 to 255
+	 * @param   green  The green value of the color from 0 to 255
+	 * @param   blue   The green value of the color from 0 to 255
+	 * @param   alpha  How opaque the color should be, from 0 to 255
+	 * @return  The color as a FlxColor
 	 */
-	public static inline function fromRGB(Red:Int, Green:Int, Blue:Int, Alpha:Int = 255):FlxColor
+	public static inline function fromRGB(red:Int, green:Int, blue:Int, alpha = 0xFF):FlxColor
 	{
 		var color = new FlxColor();
-		return color.setRGB(Red, Green, Blue, Alpha);
+		return color.setRGB(red, green, blue, alpha);
 	}
-
+	
 	/**
 	 * Generate a color from float RGB values (0 to 1)
 	 *
-	 * @param Red	The red value of the color from 0 to 1
-	 * @param Green	The green value of the color from 0 to 1
-	 * @param Blue	The green value of the color from 0 to 1
-	 * @param Alpha	How opaque the color should be, from 0 to 1
-	 * @return The color as a FlxColor
+	 * @param   red    The red value of the color from 0 to 1
+	 * @param   green  The green value of the color from 0 to 1
+	 * @param   blue   The green value of the color from 0 to 1
+	 * @param   alpha  How opaque the color should be, from 0 to 1
+	 * @return  The color as a FlxColor
 	 */
-	public static inline function fromRGBFloat(Red:Float, Green:Float, Blue:Float, Alpha:Float = 1):FlxColor
+	public static inline function fromRGBFloat(red:Float, green:Float, blue:Float, alpha = 1.0):FlxColor
 	{
 		var color = new FlxColor();
-		return color.setRGBFloat(Red, Green, Blue, Alpha);
+		return color.setRGBFloat(red, green, blue, alpha);
 	}
-
+	
 	/**
 	 * Generate a color from CMYK values (0 to 1)
 	 *
-	 * @param Cyan		The cyan value of the color from 0 to 1
-	 * @param Magenta	The magenta value of the color from 0 to 1
-	 * @param Yellow	The yellow value of the color from 0 to 1
-	 * @param Black		The black value of the color from 0 to 1
-	 * @param Alpha		How opaque the color should be, from 0 to 1
-	 * @return The color as a FlxColor
+	 * @param   cyan     The cyan value of the color from 0 to 1
+	 * @param   magenta  The magenta value of the color from 0 to 1
+	 * @param   yellow   The yellow value of the color from 0 to 1
+	 * @param   black    The black value of the color from 0 to 1
+	 * @param   alpha    How opaque the color should be, from 0 to 1
+	 * @return  The color as a FlxColor
 	 */
-	public static inline function fromCMYK(Cyan:Float, Magenta:Float, Yellow:Float, Black:Float, Alpha:Float = 1):FlxColor
+	public static inline function fromCMYK(cyan:Float, magenta:Float, yellow:Float, black:Float, alpha = 1.0):FlxColor
 	{
 		var color = new FlxColor();
-		return color.setCMYK(Cyan, Magenta, Yellow, Black, Alpha);
+		return color.setCMYK(cyan, magenta, yellow, black, alpha);
 	}
-
+	
 	/**
 	 * Generate a color from HSB (aka HSV) components.
 	 *
-	 * @param	Hue			A number between 0 and 360, indicating position on a color strip or wheel.
-	 * @param	Saturation	A number between 0 and 1, indicating how colorful or gray the color should be.  0 is gray, 1 is vibrant.
-	 * @param	Brightness	(aka Value) A number between 0 and 1, indicating how bright the color should be.  0 is black, 1 is full bright.
-	 * @param	Alpha		How opaque the color should be, either between 0 and 1 or 0 and 255.
-	 * @return	The color as a FlxColor
+	 * @param   hue         A number from 0 to 360, indicating a position on a color strip or wheel.
+	 * @param   saturation  A number from 0 to 1, indicating the vibrancy.  0 is gray, 1 is vibrant.
+	 * @param   brightness  A number from 0 to 1.  0 is black, 1 is full bright.
+	 * @param   alpha       How opaque the color should be, either between 0 and 1 or 0 and 255.
+	 * @return  The color as a FlxColor
 	 */
-	public static function fromHSB(Hue:Float, Saturation:Float, Brightness:Float, Alpha:Float = 1):FlxColor
+	public static function fromHSB(hue:Float, saturation:Float, brightness:Float, alpha = 1.0):FlxColor
 	{
 		var color = new FlxColor();
-		return color.setHSB(Hue, Saturation, Brightness, Alpha);
+		return color.setHSB(hue, saturation, brightness, alpha);
 	}
-
+	
 	/**
 	 * Generate a color from HSL components.
 	 *
-	 * @param	Hue			A number between 0 and 360, indicating position on a color strip or wheel.
-	 * @param	Saturation	A number between 0 and 1, indicating how colorful or gray the color should be.  0 is gray, 1 is vibrant.
-	 * @param	Lightness	A number between 0 and 1, indicating the lightness of the color
-	 * @param	Alpha		How opaque the color should be, either between 0 and 1 or 0 and 255.
-	 * @return	The color as a FlxColor
+	 * @param   hue         A number between 0 and 360, indicating position on a color strip or wheel.
+	 * @param   saturation  A number between 0 and 1, indicating how colorful or gray the color should be.  0 is gray, 1 is vibrant.
+	 * @param   lightness   A number between 0 and 1, indicating the lightness of the color
+	 * @param   alpha       How opaque the color should be, either between 0 and 1 or 0 and 255.
+	 * @return  The color as a FlxColor
 	 */
-	public static inline function fromHSL(Hue:Float, Saturation:Float, Lightness:Float, Alpha:Float = 1):FlxColor
+	public static inline function fromHSL(hue:Float, saturation:Float, lightness:Float, alpha = 1.0):FlxColor
 	{
 		var color = new FlxColor();
-		return color.setHSL(Hue, Saturation, Lightness, Alpha);
+		return color.setHSL(hue, saturation, lightness, alpha);
 	}
-
+	
+	public static inline function fromOKLab(lightness:Float, redGreen:Float, blueYellow:Float, alpha = 1.0):FlxColor
+	{
+		return new FlxOKLabColor(lightness, redGreen, blueYellow, alpha);
+	}
+	
 	/**
 	 * Parses a `String` and returns a `FlxColor` or `null` if the `String` couldn't be parsed.
 	 *
@@ -188,8 +195,8 @@ abstract FlxColor(Int) from Int from UInt to Int to UInt
 	 * - `GRAY`        -> `0xFF808080`
 	 * - `blue`        -> `0xFF0000FF`
 	 *
-	 * @param	str 	The string to be parsed
-	 * @return	A `FlxColor` or `null` if the `String` couldn't be parsed
+	 * @param   str  The string to be parsed
+	 * @return  A `FlxColor` or `null` if the `String` couldn't be parsed
 	 */
 	public static function fromString(str:String):Null<FlxColor>
 	{
@@ -538,6 +545,21 @@ abstract FlxColor(Int) from Int from UInt to Int to UInt
 		var match = Lightness - chroma / 2;
 		return setHueChromaMatch(Hue, chroma, match, Alpha);
 	}
+	
+	/**
+	 * A color space designed to that relative changes in hue will not change the overall
+	 * perceived lightness on modern displays
+	 * 
+	 * @param   lightness   A number between 0 and 1, indicating the lightness of the color
+	 * @param   redGreen    The opposing red/green channel, usually between -0.5 and 0.5
+	 * @param   blueYellow  The opposing blue/yellow channel, usually between -0.5 and 0.5
+	 * @param   alpha       How opaque the color should be, either between 0 and 1 or 0 and 255
+	 * @return  This color
+	 */
+	public inline function setOKLab(lightness:Float, redGreen:Float, blueYellow:Float, alpha = 1.0):FlxColor
+	{
+		return okLab.set(lightness, redGreen, blueYellow, alpha);
+	}
 
 	/**
 	 * Private utility function to perform common operations between setHSB and setHSL
@@ -797,6 +819,11 @@ abstract FlxColor(Int) from Int from UInt to Int to UInt
 		return this & 0x00ffffff;
 	}
 
+	inline function get_okLab():FlxOKLabColor
+	{
+		return this;
+	}
+
 	inline function maxColor():Float
 	{
 		return Math.max(redFloat, Math.max(greenFloat, blueFloat));
@@ -807,9 +834,9 @@ abstract FlxColor(Int) from Int from UInt to Int to UInt
 		return Math.min(redFloat, Math.min(greenFloat, blueFloat));
 	}
 
-	inline function boundChannel(Value:Int):Int
+	inline function boundChannel(value:Int):Int
 	{
-		return Value > 0xff ? 0xff : Value < 0 ? 0 : Value;
+		return value > 0xff ? 0xff : value < 0 ? 0 : value;
 	}
 }
 
