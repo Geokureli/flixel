@@ -172,8 +172,8 @@ class FlxDefines
 		#if (flixel_addons < version("3.3.0"))
 		abortVersion("Flixel Addons", "3.3.0 or newer", "flixel-addons", (macro null).pos);
 		#end
-		#if (flixel_ui < version("2.6.2"))
-		abortVersion("Flixel UI", "2.6.2 or newer", "flixel_ui", (macro null).pos);
+		#if (flixel_ui < version("2.6.5"))
+		abortVersion("Flixel UI", "2.6.5 or newer", "flixel-ui", (macro null).pos);
 		#end
 	}
 
