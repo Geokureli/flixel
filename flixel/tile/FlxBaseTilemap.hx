@@ -535,7 +535,7 @@ abstract class FlxBaseTilemap<Tile:FlxObject> extends FlxObject
 	 *                       `tile` is the tile data at that location, if one exists
 	 * @since 6.2.0
 	 */
-	overload public inline extern function forEachInRow(row, startColumn, endColumn, func:(index:Int, tile:Null<Tile>)->Void)
+	public function forEachInRow(row, startColumn, endColumn, func:(index:Int, tile:Null<Tile>)->Void)
 	{
 		findIndexInRow(row, startColumn, endColumn, (i, t)->{ func(i, t); return false; });
 	}
