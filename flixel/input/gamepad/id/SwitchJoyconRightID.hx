@@ -32,7 +32,7 @@ enum abstract SwitchJoyconRightID(Int) to Int
 	var ZR = 15;
 	var R = 16;
 	var PLUS = 17;
-	var HOME = 20;
+	var HOME = 20; // TODO: B16
 	var CAPTURE = 21;
 	var LEFT_STICK_CLICK = 22;
 	
@@ -64,4 +64,26 @@ enum abstract SwitchJoyconRightID(Int) to Int
 		left: LEFT_STICK_LEFT,
 		right: LEFT_STICK_RIGHT
 	});
+	
+	public function toGeneric():FlxGamepadInputID
+	{
+		return switch (cast this:SwitchJoyconRightID)
+		{
+			case SwitchJoyconRightID.Y                : FlxGamepadInputID.Y;
+			case SwitchJoyconRightID.A                : FlxGamepadInputID.A;
+			case SwitchJoyconRightID.B                : FlxGamepadInputID.X;
+			case SwitchJoyconRightID.X                : FlxGamepadInputID.B;
+			case SwitchJoyconRightID.SL               : FlxGamepadInputID.LEFT_SHOULDER;
+			case SwitchJoyconRightID.SR               : FlxGamepadInputID.RIGHT_SHOULDER;
+			case SwitchJoyconRightID.ZR               : FlxGamepadInputID.RIGHT_TRIGGER;
+			case SwitchJoyconRightID.R                : FlxGamepadInputID.BACK;
+			case SwitchJoyconRightID.PLUS             : FlxGamepadInputID.START;
+			case SwitchJoyconRightID.LEFT_STICK_CLICK : FlxGamepadInputID.LEFT_STICK_CLICK;
+			case SwitchJoyconRightID.LEFT_STICK_UP    : FlxGamepadInputID.LEFT_STICK_DIGITAL_UP;
+			case SwitchJoyconRightID.LEFT_STICK_DOWN  : FlxGamepadInputID.LEFT_STICK_DIGITAL_DOWN;
+			case SwitchJoyconRightID.LEFT_STICK_RIGHT : FlxGamepadInputID.LEFT_STICK_DIGITAL_RIGHT;
+			case SwitchJoyconRightID.LEFT_STICK_LEFT  : FlxGamepadInputID.LEFT_STICK_DIGITAL_LEFT;
+			case SwitchJoyconRightID.HOME             : FlxGamepadInputID.GUIDE;
+		}
+	}
 }

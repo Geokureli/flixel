@@ -74,4 +74,36 @@ enum abstract LogitechID(Int) to Int
 		left: RIGHT_STICK_LEFT,
 		right: RIGHT_STICK_RIGHT
 	});
+	
+	public function toGeneric():FlxGamepadInputID
+	{
+		return switch (cast this:LogitechID)
+		{
+			case LogitechID.TWO              : FlxGamepadInputID.A;
+			case LogitechID.THREE            : FlxGamepadInputID.B;
+			case LogitechID.ONE              : FlxGamepadInputID.X;
+			case LogitechID.FOUR             : FlxGamepadInputID.Y;
+			case LogitechID.DPAD_UP          : FlxGamepadInputID.DPAD_UP;
+			case LogitechID.DPAD_DOWN        : FlxGamepadInputID.DPAD_DOWN;
+			case LogitechID.DPAD_LEFT        : FlxGamepadInputID.DPAD_LEFT;
+			case LogitechID.DPAD_RIGHT       : FlxGamepadInputID.DPAD_RIGHT;
+			case LogitechID.FIVE             : FlxGamepadInputID.LEFT_SHOULDER;
+			case LogitechID.SIX              : FlxGamepadInputID.RIGHT_SHOULDER;
+			case LogitechID.SEVEN            : FlxGamepadInputID.LEFT_TRIGGER;
+			case LogitechID.EIGHT            : FlxGamepadInputID.RIGHT_TRIGGER;
+			case LogitechID.NINE             : FlxGamepadInputID.BACK;
+			case LogitechID.TEN              : FlxGamepadInputID.START;
+			case LogitechID.LEFT_STICK_CLICK : FlxGamepadInputID.LEFT_STICK_CLICK;
+			case LogitechID.LEFT_STICK_UP    : FlxGamepadInputID.LEFT_STICK_DIGITAL_UP;
+			case LogitechID.LEFT_STICK_DOWN  : FlxGamepadInputID.LEFT_STICK_DIGITAL_DOWN;
+			case LogitechID.LEFT_STICK_RIGHT : FlxGamepadInputID.LEFT_STICK_DIGITAL_RIGHT;
+			case LogitechID.LEFT_STICK_LEFT  : FlxGamepadInputID.LEFT_STICK_DIGITAL_LEFT;
+			case LogitechID.RIGHT_STICK_CLICK: FlxGamepadInputID.RIGHT_STICK_CLICK;
+			case LogitechID.RIGHT_STICK_UP   : FlxGamepadInputID.RIGHT_STICK_DIGITAL_UP;
+			case LogitechID.RIGHT_STICK_DOWN : FlxGamepadInputID.RIGHT_STICK_DIGITAL_DOWN;
+			case LogitechID.RIGHT_STICK_RIGHT: FlxGamepadInputID.RIGHT_STICK_DIGITAL_RIGHT;
+			case LogitechID.RIGHT_STICK_LEFT : FlxGamepadInputID.RIGHT_STICK_DIGITAL_LEFT;
+			case LogitechID.LOGITECH         : FlxGamepadInputID.GUIDE;
+		}
+	}
 }

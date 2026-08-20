@@ -48,4 +48,35 @@ enum abstract OUYAID(Int) to Int
 		left: RIGHT_STICK_LEFT,
 		right: RIGHT_STICK_RIGHT
 	});
+	
+	
+	public function toGeneric():FlxGamepadInputID
+	{
+		return switch (cast this:OUYAID)
+		{
+			case OUYAID.A                : FlxGamepadInputID.A;
+			case OUYAID.O                : FlxGamepadInputID.B;
+			case OUYAID.U                : FlxGamepadInputID.X;
+			case OUYAID.Y                : FlxGamepadInputID.Y;
+			case OUYAID.DPAD_UP          : FlxGamepadInputID.DPAD_UP;
+			case OUYAID.DPAD_DOWN        : FlxGamepadInputID.DPAD_DOWN;
+			case OUYAID.DPAD_LEFT        : FlxGamepadInputID.DPAD_LEFT;
+			case OUYAID.DPAD_RIGHT       : FlxGamepadInputID.DPAD_RIGHT;
+			case OUYAID.LB               : FlxGamepadInputID.LEFT_SHOULDER;
+			case OUYAID.RB               : FlxGamepadInputID.RIGHT_SHOULDER;
+			case OUYAID.LEFT_TRIGGER     : FlxGamepadInputID.LEFT_TRIGGER;
+			case OUYAID.RIGHT_TRIGGER    : FlxGamepadInputID.RIGHT_TRIGGER;
+			case OUYAID.HOME             : FlxGamepadInputID.START;
+			case OUYAID.LEFT_STICK_CLICK : FlxGamepadInputID.LEFT_STICK_CLICK;
+			case OUYAID.LEFT_STICK_UP    : FlxGamepadInputID.LEFT_STICK_DIGITAL_UP;
+			case OUYAID.LEFT_STICK_DOWN  : FlxGamepadInputID.LEFT_STICK_DIGITAL_DOWN;
+			case OUYAID.LEFT_STICK_RIGHT : FlxGamepadInputID.LEFT_STICK_DIGITAL_RIGHT;
+			case OUYAID.LEFT_STICK_LEFT  : FlxGamepadInputID.LEFT_STICK_DIGITAL_LEFT;
+			case OUYAID.RIGHT_STICK_CLICK: FlxGamepadInputID.RIGHT_STICK_CLICK;
+			case OUYAID.RIGHT_STICK_UP   : FlxGamepadInputID.RIGHT_STICK_DIGITAL_UP;
+			case OUYAID.RIGHT_STICK_DOWN : FlxGamepadInputID.RIGHT_STICK_DIGITAL_DOWN;
+			case OUYAID.RIGHT_STICK_RIGHT: FlxGamepadInputID.RIGHT_STICK_DIGITAL_RIGHT;
+			case OUYAID.RIGHT_STICK_LEFT : FlxGamepadInputID.RIGHT_STICK_DIGITAL_LEFT;
+		}
+	}
 }

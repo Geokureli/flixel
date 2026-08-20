@@ -63,4 +63,25 @@ enum abstract SwitchJoyconLeftID(Int) to Int
 		right: LEFT_STICK_RIGHT
 	});
 	
+	public function toGeneric():FlxGamepadInputID
+	{
+		return switch (cast this:SwitchJoyconLeftID)
+		{
+			case SwitchJoyconLeftID.UP               : FlxGamepadInputID.Y;
+			case SwitchJoyconLeftID.DOWN             : FlxGamepadInputID.A;
+			case SwitchJoyconLeftID.LEFT             : FlxGamepadInputID.X;
+			case SwitchJoyconLeftID.RIGHT            : FlxGamepadInputID.B;
+			case SwitchJoyconLeftID.SL               : FlxGamepadInputID.LEFT_SHOULDER;
+			case SwitchJoyconLeftID.SR               : FlxGamepadInputID.RIGHT_SHOULDER;
+			case SwitchJoyconLeftID.ZL               : FlxGamepadInputID.LEFT_TRIGGER;
+			case SwitchJoyconLeftID.L                : FlxGamepadInputID.BACK;
+			case SwitchJoyconLeftID.MINUS            : FlxGamepadInputID.START;
+			case SwitchJoyconLeftID.LEFT_STICK_CLICK : FlxGamepadInputID.LEFT_STICK_CLICK;
+			case SwitchJoyconLeftID.LEFT_STICK_UP    : FlxGamepadInputID.LEFT_STICK_DIGITAL_UP;
+			case SwitchJoyconLeftID.LEFT_STICK_DOWN  : FlxGamepadInputID.LEFT_STICK_DIGITAL_DOWN;
+			case SwitchJoyconLeftID.LEFT_STICK_RIGHT : FlxGamepadInputID.LEFT_STICK_DIGITAL_RIGHT;
+			case SwitchJoyconLeftID.LEFT_STICK_LEFT  : FlxGamepadInputID.LEFT_STICK_DIGITAL_LEFT;
+			case SwitchJoyconLeftID.CAPTURE          : FlxGamepadInputID.EXTRA_0;
+		}
+	}
 }
