@@ -170,4 +170,37 @@ enum abstract PS4ID(Int) to Int
 		left: RIGHT_STICK_LEFT,
 		right: RIGHT_STICK_RIGHT
 	});
+	
+	public function toGeneric():FlxGamepadInputID
+	{
+		return switch (cast this:PS4ID)
+		{
+			case PS4ID.X                : FlxGamepadInputID.A;
+			case PS4ID.CIRCLE           : FlxGamepadInputID.B;
+			case PS4ID.SQUARE           : FlxGamepadInputID.X;
+			case PS4ID.TRIANGLE         : FlxGamepadInputID.Y;
+			case PS4ID.DPAD_UP          : FlxGamepadInputID.DPAD_UP;
+			case PS4ID.DPAD_DOWN        : FlxGamepadInputID.DPAD_DOWN;
+			case PS4ID.DPAD_LEFT        : FlxGamepadInputID.DPAD_LEFT;
+			case PS4ID.DPAD_RIGHT       : FlxGamepadInputID.DPAD_RIGHT;
+			case PS4ID.L1               : FlxGamepadInputID.LEFT_SHOULDER;
+			case PS4ID.R1               : FlxGamepadInputID.RIGHT_SHOULDER;
+			case PS4ID.L2               : FlxGamepadInputID.LEFT_TRIGGER;
+			case PS4ID.R2               : FlxGamepadInputID.RIGHT_TRIGGER;
+			case PS4ID.OPTIONS          : FlxGamepadInputID.START;
+			case PS4ID.SHARE            : FlxGamepadInputID.BACK;
+			case PS4ID.LEFT_STICK_CLICK : FlxGamepadInputID.LEFT_STICK_CLICK;
+			case PS4ID.RIGHT_STICK_CLICK: FlxGamepadInputID.RIGHT_STICK_CLICK;
+			case PS4ID.LEFT_STICK_UP    : FlxGamepadInputID.LEFT_STICK_DIGITAL_UP;
+			case PS4ID.LEFT_STICK_DOWN  : FlxGamepadInputID.LEFT_STICK_DIGITAL_DOWN;
+			case PS4ID.LEFT_STICK_RIGHT : FlxGamepadInputID.LEFT_STICK_DIGITAL_RIGHT;
+			case PS4ID.LEFT_STICK_LEFT  : FlxGamepadInputID.LEFT_STICK_DIGITAL_LEFT;
+			case PS4ID.RIGHT_STICK_UP   : FlxGamepadInputID.RIGHT_STICK_DIGITAL_UP;
+			case PS4ID.RIGHT_STICK_DOWN : FlxGamepadInputID.RIGHT_STICK_DIGITAL_DOWN;
+			case PS4ID.RIGHT_STICK_RIGHT: FlxGamepadInputID.RIGHT_STICK_DIGITAL_RIGHT;
+			case PS4ID.RIGHT_STICK_LEFT : FlxGamepadInputID.RIGHT_STICK_DIGITAL_LEFT;
+			case PS4ID.PS               : FlxGamepadInputID.GUIDE;
+			case PS4ID.TOUCHPAD_CLICK   : FlxGamepadInputID.EXTRA_0;
+		}
+	}
 }

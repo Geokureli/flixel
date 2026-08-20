@@ -93,4 +93,36 @@ enum abstract SwitchProID(Int) to Int
 		right: RIGHT_STICK_RIGHT
 	});
 	
+	public function toGeneric():FlxGamepadInputID
+	{
+		return switch (cast this:SwitchProID)
+		{
+			case SwitchProID.B                : FlxGamepadInputID.A;
+			case SwitchProID.A                : FlxGamepadInputID.B;
+			case SwitchProID.Y                : FlxGamepadInputID.X;
+			case SwitchProID.X                : FlxGamepadInputID.Y;
+			case SwitchProID.DPAD_UP          : FlxGamepadInputID.DPAD_UP;
+			case SwitchProID.DPAD_DOWN        : FlxGamepadInputID.DPAD_DOWN;
+			case SwitchProID.DPAD_LEFT        : FlxGamepadInputID.DPAD_LEFT;
+			case SwitchProID.DPAD_RIGHT       : FlxGamepadInputID.DPAD_RIGHT;
+			case SwitchProID.L                : FlxGamepadInputID.LEFT_SHOULDER;
+			case SwitchProID.R                : FlxGamepadInputID.RIGHT_SHOULDER;
+			case SwitchProID.ZL               : FlxGamepadInputID.LEFT_TRIGGER;
+			case SwitchProID.ZR               : FlxGamepadInputID.RIGHT_TRIGGER;
+			case SwitchProID.PLUS             : FlxGamepadInputID.START;
+			case SwitchProID.MINUS            : FlxGamepadInputID.BACK;
+			case SwitchProID.LEFT_STICK_CLICK : FlxGamepadInputID.LEFT_STICK_CLICK;
+			case SwitchProID.RIGHT_STICK_CLICK: FlxGamepadInputID.RIGHT_STICK_CLICK;
+			case SwitchProID.LEFT_STICK_UP    : FlxGamepadInputID.LEFT_STICK_DIGITAL_UP;
+			case SwitchProID.LEFT_STICK_DOWN  : FlxGamepadInputID.LEFT_STICK_DIGITAL_DOWN;
+			case SwitchProID.LEFT_STICK_RIGHT : FlxGamepadInputID.LEFT_STICK_DIGITAL_RIGHT;
+			case SwitchProID.LEFT_STICK_LEFT  : FlxGamepadInputID.LEFT_STICK_DIGITAL_LEFT;
+			case SwitchProID.RIGHT_STICK_UP   : FlxGamepadInputID.RIGHT_STICK_DIGITAL_UP;
+			case SwitchProID.RIGHT_STICK_DOWN : FlxGamepadInputID.RIGHT_STICK_DIGITAL_DOWN;
+			case SwitchProID.RIGHT_STICK_RIGHT: FlxGamepadInputID.RIGHT_STICK_DIGITAL_RIGHT;
+			case SwitchProID.RIGHT_STICK_LEFT : FlxGamepadInputID.RIGHT_STICK_DIGITAL_LEFT;
+			case SwitchProID.HOME             : FlxGamepadInputID.GUIDE;
+			case SwitchProID.CAPTURE          : FlxGamepadInputID.EXTRA_0;
+		}
+	}
 }
