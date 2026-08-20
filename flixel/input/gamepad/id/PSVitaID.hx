@@ -61,6 +61,7 @@ enum abstract PSVitaID(Int) to Int
 			case PSVitaID.DPAD_RIGHT       : FlxGamepadInputID.DPAD_RIGHT;
 			case PSVitaID.L                : FlxGamepadInputID.LEFT_SHOULDER;
 			case PSVitaID.R                : FlxGamepadInputID.RIGHT_SHOULDER;
+			case PSVitaID.START            : FlxGamepadInputID.START;
 			case PSVitaID.SELECT           : FlxGamepadInputID.BACK;
 			case PSVitaID.LEFT_STICK_UP    : FlxGamepadInputID.LEFT_STICK_DIGITAL_UP;
 			case PSVitaID.LEFT_STICK_DOWN  : FlxGamepadInputID.LEFT_STICK_DIGITAL_DOWN;
@@ -70,7 +71,6 @@ enum abstract PSVitaID(Int) to Int
 			case PSVitaID.RIGHT_STICK_DOWN : FlxGamepadInputID.RIGHT_STICK_DIGITAL_DOWN;
 			case PSVitaID.RIGHT_STICK_RIGHT: FlxGamepadInputID.RIGHT_STICK_DIGITAL_RIGHT;
 			case PSVitaID.RIGHT_STICK_LEFT : FlxGamepadInputID.RIGHT_STICK_DIGITAL_LEFT;
-			case PSVitaID.PS               : FlxGamepadInputID.GUIDE;
 		}
 	}
 }
