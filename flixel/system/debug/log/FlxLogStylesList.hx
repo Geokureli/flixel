@@ -1,5 +1,10 @@
 package flixel.system.debug.log;
 
+/**
+ * A list of the various log styles, useful for changing individual behaviors
+ * 
+ * @since 6.2.0
+ */
 class FlxLogStylesList
 {
 	public var normal (default, set):FlxLogStyle;
@@ -86,5 +91,4 @@ class FlxLogStylesList
 		@:bypassAccessor LogStyle.CONSOLE = style;
 		return this.console = style;
 	}
-	
 }
